@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section C: The Waffle Basket</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0a0a0f;
+            color: #e8e8f0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .slide {
+            background: #1a1a24;
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #e8c47c, #e07860);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #e8c47c;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: #7cc4e8;
+            margin-bottom: 1rem;
+        }
+
+        .dimensions {
+            background: rgba(232, 196, 124, 0.1);
+            border-left: 4px solid #e8c47c;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .key-insight {
+            background: rgba(124, 196, 232, 0.1);
+            border-left: 4px solid #7cc4e8;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+        }
+
+        .key-insight h3 {
+            font-size: 2.2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .cone-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .cone-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cone-card h4 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            color: #7ce8b4;
+            margin-bottom: 0.8rem;
+        }
+
+        .cone-card p {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #e8e8f0;
+        }
+
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        canvas {
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .calculation {
+            background: rgba(124, 232, 180, 0.1);
+            border-left: 4px solid #7ce8b4;
+            padding: 2rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+        }
+
+        .calculation ol {
+            margin-left: 1.5rem;
+            line-height: 2;
+        }
+
+        .calculation li {
+            font-size: 1.2rem;
+            margin: 0.8rem 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .highlight {
+            color: #e8c47c;
+            font-weight: 600;
+        }
+
+        .answer-highlight {
+            color: #7ce8b4;
+            font-weight: 600;
+            font-size: 1.3em;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 3rem;
+        }
+
+        button {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #e8c47c, #e07860);
+            color: #0a0a0f;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(232, 196, 124, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(232, 196, 124, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-indicator {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: #7cc4e8;
+            font-size: 0.9rem;
+        }
+
+        .note {
+            background: rgba(224, 120, 96, 0.1);
+            border-left: 4px solid #e07860;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <a href="main.html" style="position: fixed; top: 20px; left: 20px; color: #e8c47c; text-decoration: none; font-size: 0.9rem; z-index: 1000;">&larr; Back to Home</a>
+    <div class="container">
+        <!-- Slide 1: Context -->
+        <div class="slide active" id="slide1">
+            <h1>The Waffle Basket</h1>
+            <h2>Understanding the Frustum Shape</h2>
+
+            <div class="canvas-container">
+                <canvas id="frustumCanvas" width="600" height="500"></canvas>
+            </div>
+
+            <div class="dimensions">
+                <strong>Dimensions:</strong><br>
+                Bottom radius (r₁) = 21 mm<br>
+                Top radius (r₂) = 42 mm<br>
+                Height (h) = 28 mm
+            </div>
+        </div>
+
+        <!-- Slide 2: Key Insight -->
+        <div class="slide" id="slide2">
+            <h1>The Waffle Basket</h1>
+
+            <div class="key-insight">
+                <h3>Frustum = Big Cone − Small Cone</h3>
+
+                <div class="canvas-container">
+                    <canvas id="twoConesCanvas" width="700" height="600"></canvas>
+                </div>
+
+                <p style="text-align: center; margin: 1.5rem 0; font-size: 1.1rem;">
+                    <span class="highlight">Radii ratio 21:42 = 1:2</span>, so heights also 1:2
+                </p>
+
+                <div class="cone-info">
+                    <div class="cone-card">
+                        <h4>Small Cone (Cut Off)</h4>
+                        <p>
+                            r = 21 mm<br>
+                            h = 28 mm<br>
+                            l = 35 mm
+                        </p>
+                    </div>
+                    <div class="cone-card">
+                        <h4>Big Cone (Complete)</h4>
+                        <p>
+                            R = 42 mm<br>
+                            H = 56 mm<br>
+                            L = 70 mm
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Question C1 -->
+        <div class="slide" id="slide3">
+            <h1>The Waffle Basket</h1>
+            <h2>Question C1</h2>
+
+            <div class="canvas-container">
+                <canvas id="surfaceAreaCanvas" width="600" height="500"></canvas>
+            </div>
+
+            <h3 style="text-align: center; margin-top: 2rem; font-size: 2.5rem;">
+                Find the Total Surface Area
+            </h3>
+
+            <div class="dimensions" style="text-align: center;">
+                (Including the circular base at the bottom)
+            </div>
+        </div>
+
+        <!-- Slide 4: Answer C1 -->
+        <div class="slide" id="slide4">
+            <h1>The Waffle Basket</h1>
+            <h2>Answer C1: Total Surface Area</h2>
+
+            <div class="calculation">
+                <ol>
+                    <li>Big cone CSA = <span class="highlight">(22/7) × 42 × 70</span> = <span class="answer-highlight">9240 mm²</span></li>
+                    <li>Small cone CSA = <span class="highlight">(22/7) × 21 × 35</span> = <span class="answer-highlight">2310 mm²</span></li>
+                    <li>Frustum CSA = <span class="highlight">9240 − 2310</span> = <span class="answer-highlight">6930 mm²</span></li>
+                    <li>Base area = <span class="highlight">(22/7) × 21²</span> = <span class="answer-highlight">1386 mm²</span></li>
+                    <li>Total Surface Area = <span class="highlight">6930 + 1386</span> = <span class="answer-highlight">8316 mm²</span></li>
+                </ol>
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="answerC1Canvas" width="700" height="400"></canvas>
+            </div>
+        </div>
+
+        <!-- Slide 5: Question C2 -->
+        <div class="slide" id="slide5">
+            <h1>The Waffle Basket</h1>
+            <h2>Question C2</h2>
+
+            <div class="canvas-container">
+                <canvas id="volumeCanvas" width="600" height="500"></canvas>
+            </div>
+
+            <h3 style="text-align: center; margin-top: 2rem; font-size: 2.5rem;">
+                Find the volume the basket can hold
+            </h3>
+        </div>
+
+        <!-- Slide 6: Answer C2 -->
+        <div class="slide" id="slide6">
+            <h1>The Waffle Basket</h1>
+            <h2>Answer C2: Volume</h2>
+
+            <div class="calculation">
+                <ol>
+                    <li>Big cone volume = <span class="highlight">⅓ × (22/7) × 42² × 56</span> = <span class="answer-highlight">103,488 mm³</span></li>
+                    <li>Small cone volume = <span class="highlight">⅓ × (22/7) × 21² × 28</span> = <span class="answer-highlight">12,936 mm³</span></li>
+                    <li>Frustum volume = <span class="highlight">103,488 − 12,936</span> = <span class="answer-highlight">90,552 mm³</span></li>
+                </ol>
+            </div>
+
+            <div class="note">
+                <strong>Ratio check:</strong> Big cone / Small cone = 8 (since 2³ = 8)<br>
+                Frustum = 7 × Small cone volume ✓
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="answerC2Canvas" width="700" height="400"></canvas>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <button id="prevBtn" onclick="changeSlide(-1)">Previous</button>
+            <button id="nextBtn" onclick="changeSlide(1)">Next</button>
+        </div>
+        <div class="slide-indicator" id="slideIndicator"></div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 6;
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const indicator = document.getElementById('slideIndicator');
+
+            if (n > totalSlides) currentSlide = totalSlides;
+            if (n < 1) currentSlide = 1;
+
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[currentSlide - 1].classList.add('active');
+
+            prevBtn.disabled = currentSlide === 1;
+            nextBtn.disabled = currentSlide === totalSlides;
+
+            indicator.textContent = `Slide ${currentSlide} of ${totalSlides}`;
+
+            // Draw canvas for current slide
+            drawCurrentSlide();
+        }
+
+        function changeSlide(n) {
+            currentSlide += n;
+            showSlide(currentSlide);
+        }
+
+        function drawCurrentSlide() {
+            switch(currentSlide) {
+                case 1:
+                    drawFrustum();
+                    break;
+                case 2:
+                    drawTwoCones();
+                    break;
+                case 3:
+                    drawSurfaceAreaDiagram();
+                    break;
+                case 4:
+                    drawAnswerC1();
+                    break;
+                case 5:
+                    drawVolumeDiagram();
+                    break;
+                case 6:
+                    drawAnswerC2();
+                    break;
+            }
+        }
+
+        // Slide 1: Draw frustum
+        function drawFrustum() {
+            const canvas = document.getElementById('frustumCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const topY = 80;
+            const bottomY = 380;
+            const r1 = 80;  // bottom radius (21mm scaled)
+            const r2 = 160; // top radius (42mm scaled)
+
+            // Draw frustum
+            ctx.save();
+
+            // Bottom circle
+            ctx.beginPath();
+            ctx.ellipse(centerX, bottomY, r1, 25, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(232, 196, 124, 0.3)';
+            ctx.fill();
+            ctx.strokeStyle = '#e8c47c';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Top circle
+            ctx.beginPath();
+            ctx.ellipse(centerX, topY, r2, 50, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(124, 196, 232, 0.3)';
+            ctx.fill();
+            ctx.strokeStyle = '#7cc4e8';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Side lines
+            ctx.beginPath();
+            ctx.moveTo(centerX - r1, bottomY);
+            ctx.lineTo(centerX - r2, topY);
+            ctx.strokeStyle = '#e07860';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(centerX + r1, bottomY);
+            ctx.lineTo(centerX + r2, topY);
+            ctx.stroke();
+
+            ctx.restore();
+
+            // Labels
+            ctx.fillStyle = '#e8c47c';
+            ctx.font = '20px "JetBrains Mono"';
+            ctx.fillText('r₁ = 21 mm', centerX + r1 + 20, bottomY);
+            ctx.fillStyle = '#7cc4e8';
+            ctx.fillText('r₂ = 42 mm', centerX + r2 + 20, topY);
+
+            // Height arrow and label
+            ctx.strokeStyle = '#7ce8b4';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(centerX - r1 - 50, bottomY);
+            ctx.lineTo(centerX - r1 - 50, topY);
+            ctx.stroke();
+
+            // Arrow heads
+            ctx.beginPath();
+            ctx.moveTo(centerX - r1 - 50, bottomY);
+            ctx.lineTo(centerX - r1 - 45, bottomY - 10);
+            ctx.moveTo(centerX - r1 - 50, bottomY);
+            ctx.lineTo(centerX - r1 - 55, bottomY - 10);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(centerX - r1 - 50, topY);
+            ctx.lineTo(centerX - r1 - 45, topY + 10);
+            ctx.moveTo(centerX - r1 - 50, topY);
+            ctx.lineTo(centerX - r1 - 55, topY + 10);
+            ctx.stroke();
+
+            ctx.fillStyle = '#7ce8b4';
+            ctx.fillText('h = 28 mm', centerX - r1 - 130, (topY + bottomY) / 2);
+        }
+
+        // Slide 2: Draw two cones - APEX AT BOTTOM (like ice cream cones)
+        function drawTwoCones() {
+            const canvas = document.getElementById('twoConesCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const topY = 50;        // Wide opening at top
+            const cutY = 220;       // Where small cone ends
+            const apexY = 550;      // Apex at BOTTOM
+            const r1 = 80;          // small cone top radius (21mm scaled)
+            const r2 = 160;         // big cone top radius (42mm scaled)
+
+            ctx.save();
+
+            // Big cone top opening (dashed) - the wide part
+            ctx.setLineDash([10, 5]);
+            ctx.beginPath();
+            ctx.ellipse(centerX, topY, r2, 50, 0, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(232, 196, 124, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Big cone sides going DOWN to apex
+            ctx.beginPath();
+            ctx.moveTo(centerX - r2, topY);
+            ctx.lineTo(centerX, apexY);
+            ctx.strokeStyle = 'rgba(232, 196, 124, 0.7)';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(centerX + r2, topY);
+            ctx.lineTo(centerX, apexY);
+            ctx.stroke();
+
+            // Cut line (where frustum meets small cone)
+            ctx.setLineDash([15, 10]);
+            ctx.beginPath();
+            ctx.ellipse(centerX, cutY, r1, 25, 0, 0, Math.PI * 2);
+            ctx.strokeStyle = '#e07860';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Small cone (the part that gets "removed" - from cut line to apex)
+            ctx.beginPath();
+            ctx.moveTo(centerX - r1, cutY);
+            ctx.lineTo(centerX, apexY);
+            ctx.strokeStyle = '#7cc4e8';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(centerX + r1, cutY);
+            ctx.lineTo(centerX, apexY);
+            ctx.stroke();
+
+            // Frustum (the basket part - from top opening to cut line)
+            ctx.fillStyle = 'rgba(124, 232, 180, 0.15)';
+            ctx.beginPath();
+            ctx.moveTo(centerX - r2, topY);
+            ctx.lineTo(centerX - r1, cutY);
+            ctx.lineTo(centerX + r1, cutY);
+            ctx.lineTo(centerX + r2, topY);
+            ctx.closePath();
+            ctx.fill();
+
+            // Apex point
+            ctx.beginPath();
+            ctx.arc(centerX, apexY, 6, 0, Math.PI * 2);
+            ctx.fillStyle = '#e8c47c';
+            ctx.fill();
+
+            ctx.restore();
+
+            // Labels with boxes
+            const drawLabel = (text, x, y, color) => {
+                ctx.fillStyle = 'rgba(26, 26, 36, 0.9)';
+                ctx.fillRect(x - 5, y - 25, 160, 35);
+                ctx.fillStyle = color;
+                ctx.font = 'bold 16px "JetBrains Mono"';
+                ctx.fillText(text, x, y);
+            };
+
+            drawLabel('Big Cone Opening', centerX - 80, topY - 10, '#e8c47c');
+            drawLabel('Frustum (Basket)', centerX + 100, (topY + cutY) / 2, '#7ce8b4');
+            drawLabel('Cut here (r=21)', centerX + 100, cutY + 10, '#e07860');
+            drawLabel('Small Cone', centerX - 180, (cutY + apexY) / 2, '#7cc4e8');
+            drawLabel('Apex', centerX + 30, apexY, '#e8c47c');
+        }
+
+        // Slide 3: Surface area diagram
+        function drawSurfaceAreaDiagram() {
+            const canvas = document.getElementById('surfaceAreaCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const topY = 80;
+            const bottomY = 380;
+            const r1 = 80;
+            const r2 = 160;
+
+            // Draw frustum with base highlighted
+            ctx.save();
+
+            // Bottom circle (HIGHLIGHTED)
+            ctx.beginPath();
+            ctx.ellipse(centerX, bottomY, r1, 25, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(124, 232, 180, 0.5)';
+            ctx.fill();
+            ctx.strokeStyle = '#7ce8b4';
+            ctx.lineWidth = 5;
+            ctx.stroke();
+
+            // Glow effect for base
+            ctx.shadowColor = '#7ce8b4';
+            ctx.shadowBlur = 20;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            // Top circle
+            ctx.beginPath();
+            ctx.ellipse(centerX, topY, r2, 50, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(124, 196, 232, 0.3)';
+            ctx.fill();
+            ctx.strokeStyle = '#7cc4e8';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Curved surface
+            ctx.beginPath();
+            ctx.moveTo(centerX - r1, bottomY);
+            ctx.lineTo(centerX - r2, topY);
+            ctx.strokeStyle = '#e07860';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(centerX + r1, bottomY);
+            ctx.lineTo(centerX + r2, topY);
+            ctx.stroke();
+
+            ctx.restore();
+
+            // Labels
+            ctx.fillStyle = '#7ce8b4';
+            ctx.font = 'bold 22px "JetBrains Mono"';
+            ctx.fillText('Base (Bottom)', centerX - 80, bottomY + 60);
+
+            ctx.fillStyle = '#e07860';
+            ctx.fillText('Curved Surface', centerX + r2 + 20, (topY + bottomY) / 2);
+        }
+
+        // Slide 4: Answer C1 visualization
+        function drawAnswerC1() {
+            const canvas = document.getElementById('answerC1Canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const spacing = 220;
+            const startX = 100;
+            const centerY = 200;
+
+            // Small cone
+            drawMiniCone(ctx, startX, centerY, 40, 'Small Cone', '2310 mm²', '#7cc4e8');
+
+            // Minus sign
+            ctx.fillStyle = '#e8e8f0';
+            ctx.font = 'bold 48px "Cormorant Garamond"';
+            ctx.fillText('-', startX + spacing - 30, centerY + 10);
+
+            // Big cone
+            drawMiniCone(ctx, startX + spacing, centerY, 60, 'Big Cone', '9240 mm²', '#e8c47c');
+
+            // Equals sign
+            ctx.fillText('=', startX + 2 * spacing - 30, centerY + 10);
+
+            // Frustum
+            drawMiniFrustum(ctx, startX + 2 * spacing, centerY, 40, 60, 'Frustum CSA', '6930 mm²', '#e07860');
+        }
+
+        // Slide 5: Volume diagram
+        function drawVolumeDiagram() {
+            const canvas = document.getElementById('volumeCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const topY = 80;
+            const bottomY = 380;
+            const r1 = 80;
+            const r2 = 160;
+
+            // Draw frustum with volume indication
+            ctx.save();
+
+            // Fill to show volume
+            ctx.fillStyle = 'rgba(124, 196, 232, 0.3)';
+            ctx.beginPath();
+            ctx.moveTo(centerX - r1, bottomY);
+            ctx.lineTo(centerX - r2, topY);
+            ctx.arc(centerX, topY, r2, Math.PI, 0);
+            ctx.lineTo(centerX + r1, bottomY);
+            ctx.arc(centerX, bottomY, r1, 0, Math.PI);
+            ctx.closePath();
+            ctx.fill();
+
+            // Bottom circle
+            ctx.beginPath();
+            ctx.ellipse(centerX, bottomY, r1, 25, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(232, 196, 124, 0.4)';
+            ctx.fill();
+            ctx.strokeStyle = '#e8c47c';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Top circle
+            ctx.beginPath();
+            ctx.ellipse(centerX, topY, r2, 50, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(124, 196, 232, 0.4)';
+            ctx.fill();
+            ctx.strokeStyle = '#7cc4e8';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Side lines
+            ctx.beginPath();
+            ctx.moveTo(centerX - r1, bottomY);
+            ctx.lineTo(centerX - r2, topY);
+            ctx.strokeStyle = '#e07860';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(centerX + r1, bottomY);
+            ctx.lineTo(centerX + r2, topY);
+            ctx.stroke();
+
+            ctx.restore();
+
+            // Volume label
+            ctx.fillStyle = '#7ce8b4';
+            ctx.font = 'bold 24px "JetBrains Mono"';
+            ctx.fillText('Volume = ?', centerX - 70, centerY - 50);
+        }
+
+        // Slide 6: Answer C2 visualization
+        function drawAnswerC2() {
+            const canvas = document.getElementById('answerC2Canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const spacing = 220;
+            const startX = 100;
+            const centerY = 200;
+
+            // Big cone
+            drawMiniCone(ctx, startX, centerY, 60, 'Big Cone', '103,488 mm³', '#e8c47c');
+
+            // Minus sign
+            ctx.fillStyle = '#e8e8f0';
+            ctx.font = 'bold 48px "Cormorant Garamond"';
+            ctx.fillText('-', startX + spacing - 30, centerY + 10);
+
+            // Small cone
+            drawMiniCone(ctx, startX + spacing, centerY, 40, 'Small Cone', '12,936 mm³', '#7cc4e8');
+
+            // Equals sign
+            ctx.fillText('=', startX + 2 * spacing - 30, centerY + 10);
+
+            // Frustum
+            drawMiniFrustum(ctx, startX + 2 * spacing, centerY, 40, 60, 'Frustum', '90,552 mm³', '#7ce8b4');
+        }
+
+        // Helper function to draw mini cone - APEX AT BOTTOM
+        function drawMiniCone(ctx, x, y, r, label, value, color) {
+            const h = r * 1.8;
+
+            ctx.save();
+            // Cone with apex at BOTTOM
+            ctx.beginPath();
+            ctx.moveTo(x - r, y - h / 2);    // Top left
+            ctx.lineTo(x + r, y - h / 2);    // Top right
+            ctx.lineTo(x, y + h / 2);        // Apex at bottom
+            ctx.closePath();
+            ctx.fillStyle = color + '30';
+            ctx.fill();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Top ellipse (opening)
+            ctx.beginPath();
+            ctx.ellipse(x, y - h / 2, r, r / 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.fillStyle = color;
+            ctx.font = 'bold 14px "Outfit"';
+            ctx.textAlign = 'center';
+            ctx.fillText(label, x, y + h / 2 + 30);
+            ctx.font = '12px "JetBrains Mono"';
+            ctx.fillText(value, x, y + h / 2 + 50);
+            ctx.textAlign = 'left';
+        }
+
+        // Helper function to draw mini frustum - wider at top, narrower at bottom
+        function drawMiniFrustum(ctx, x, y, r1, r2, label, value, color) {
+            const h = 70;
+
+            ctx.save();
+            // Frustum: r2 is top (bigger), r1 is bottom (smaller)
+            ctx.beginPath();
+            ctx.moveTo(x - r2, y - h / 2);   // Top left (wider)
+            ctx.lineTo(x + r2, y - h / 2);   // Top right (wider)
+            ctx.lineTo(x + r1, y + h / 2);   // Bottom right (narrower)
+            ctx.lineTo(x - r1, y + h / 2);   // Bottom left (narrower)
+            ctx.closePath();
+            ctx.fillStyle = color + '30';
+            ctx.fill();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Top ellipse (bigger opening)
+            ctx.beginPath();
+            ctx.ellipse(x, y - h / 2, r2, r2 / 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Bottom ellipse (smaller)
+            ctx.beginPath();
+            ctx.ellipse(x, y + h / 2, r1, r1 / 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.fillStyle = color;
+            ctx.font = 'bold 14px "Outfit"';
+            ctx.textAlign = 'center';
+            ctx.fillText(label, x, y + h / 2 + 30);
+            ctx.font = '12px "JetBrains Mono"';
+            ctx.fillText(value, x, y + h / 2 + 50);
+            ctx.textAlign = 'left';
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+
+        // Initialize
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>

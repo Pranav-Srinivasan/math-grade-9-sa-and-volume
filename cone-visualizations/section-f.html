@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section F - Ice Cream Cost Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            overflow: hidden;
+        }
+
+        .slideshow-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            display: none;
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: #1a1a24;
+            border-radius: 24px;
+            padding: 60px 80px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 4em;
+            font-weight: 700;
+            color: #e8c47c;
+            margin-bottom: 40px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3em;
+            font-weight: 600;
+            color: #e8c47c;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .formula-box {
+            background: rgba(232, 196, 124, 0.1);
+            border-left: 4px solid #e8c47c;
+            padding: 20px 30px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        .formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.4em;
+            color: #7cc4e8;
+            line-height: 1.8;
+        }
+
+        .result {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2em;
+            color: #7ce8b4;
+            font-weight: 600;
+            text-align: center;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(124, 232, 180, 0.1);
+            border-radius: 12px;
+        }
+
+        .cost-item {
+            font-size: 1.3em;
+            color: #e0e0e0;
+            margin: 10px 0;
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cost-label {
+            font-weight: 500;
+        }
+
+        .cost-value {
+            font-family: 'JetBrains Mono', monospace;
+            color: #7cc4e8;
+            font-size: 1.1em;
+        }
+
+        .rate-card {
+            background: rgba(224, 120, 96, 0.1);
+            border: 2px solid #e07860;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .rate-item {
+            font-size: 1.2em;
+            margin: 8px 0;
+            color: #e0e0e0;
+        }
+
+        .highlight {
+            color: #e8c47c;
+            font-weight: 600;
+        }
+
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        canvas {
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: #e8c47c;
+            color: #0a0a0f;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(232, 196, 124, 0.3);
+        }
+
+        .nav-btn:hover {
+            background: #f0d89c;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(232, 196, 124, 0.5);
+        }
+
+        .nav-btn:disabled {
+            background: #3a3a44;
+            color: #666;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 40px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2em;
+            color: #7cc4e8;
+            z-index: 1000;
+        }
+
+        .question-badge {
+            display: inline-block;
+            background: #e07860;
+            color: #0a0a0f;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .answer-badge {
+            display: inline-block;
+            background: #7ce8b4;
+            color: #0a0a0f;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .description {
+            font-size: 1.3em;
+            color: #c0c0c0;
+            text-align: center;
+            margin: 20px 0;
+            font-style: italic;
+        }
+
+        .note {
+            font-size: 1.1em;
+            color: #e8c47c;
+            background: rgba(232, 196, 124, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 3px solid #e8c47c;
+        }
+    </style>
+</head>
+<body>
+    <a href="main.html" style="position: fixed; top: 30px; left: 40px; color: #e8c47c; text-decoration: none; font-size: 0.9rem; z-index: 1000;">&larr; Back to Home</a>
+    <div class="slide-counter">
+        <span id="currentSlide">1</span> / <span id="totalSlides">9</span>
+    </div>
+
+    <div class="slideshow-container">
+        <!-- Slide 1: Setup -->
+        <div class="slide active">
+            <h1>Cost Analysis - The Business End</h1>
+            <div class="content">
+                <div class="formula-box">
+                    <div class="formula">New cone: r = 21 mm, h = 90 mm</div>
+                    <div class="formula">Cone volume = ⅓ × (22/7) × 21² × 90 = <span class="highlight">41,580 mm³</span></div>
+                    <div class="formula">Sphere (r=21): <span class="highlight">38,808 mm³</span></div>
+                    <div class="formula">Hemisphere: <span class="highlight">19,404 mm³</span></div>
+                </div>
+
+                <div class="rate-card">
+                    <h3 style="color: #e07860; font-family: 'Cormorant Garamond', serif; margin-bottom: 15px; font-size: 1.8em;">Cost Rates</h3>
+                    <div class="rate-item"><span class="highlight">Waffle cone:</span> ₹5 fixed</div>
+                    <div class="rate-item"><span class="highlight">Ice cream:</span> ₹1 per 1000 mm³</div>
+                    <div class="rate-item"><span class="highlight">Vanilla cream:</span> ₹0.50 per 1000 mm³</div>
+                    <div class="rate-item"><span class="highlight">Premium ice cream:</span> ₹2 per 1000 mm³</div>
+                    <div class="rate-item"><span class="highlight">Dark chocolate:</span> ₹3 per 1000 mm³</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: F1 Question -->
+        <div class="slide">
+            <div class="content">
+                <div style="text-align: center;">
+                    <span class="question-badge">F1 QUESTION</span>
+                </div>
+                <h2>The Classic</h2>
+                <div class="description">Empty cone + spherical scoop on top</div>
+
+                <div class="canvas-container">
+                    <canvas id="f1Canvas" width="400" height="500"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: F1 Answer -->
+        <div class="slide">
+            <div class="content">
+                <div style="text-align: center;">
+                    <span class="answer-badge">F1 ANSWER</span>
+                </div>
+                <h2>The Classic</h2>
+
+                <div class="cost-item">
+                    <span class="cost-label">Ice cream sphere:</span>
+                    <span class="cost-value">38,808 × (1/1000) = ₹38.81</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Waffle cone:</span>
+                    <span class="cost-value">₹5.00</span>
+                </div>
+
+                <div class="result">Total: ≈ ₹44</div>
+            </div>
+        </div>
+
+        <!-- Slide 4: F2 Question -->
+        <div class="slide">
+            <div class="content">
+                <div style="text-align: center;">
+                    <span class="question-badge">F2 QUESTION</span>
+                </div>
+                <h2>Fully Loaded</h2>
+                <div class="description">Cone filled with vanilla cream + hemisphere of premium ice cream on top</div>
+
+                <div class="canvas-container">
+                    <canvas id="f2Canvas" width="400" height="500"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: F2 Answer -->
+        <div class="slide">
+            <div class="content">
+                <div style="text-align: center;">
+                    <span class="answer-badge">F2 ANSWER</span>
+                </div>
+                <h2>Fully Loaded</h2>
+
+                <div class="cost-item">
+                    <span class="cost-label">Vanilla cream (cone filled):</span>
+                    <span class="cost-value">41,580 × 0.50/1000 = ₹20.79</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Premium ice cream (hemisphere):</span>
+                    <span class="cost-value">19,404 × 2/1000 = ₹38.81</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Waffle cone:</span>
+                    <span class="cost-value">₹5.00</span>
+                </div>
+
+                <div class="result">Total: ≈ ₹65</div>
+            </div>
+        </div>
+
+        <!-- Slide 6: F3 Question -->
+        <div class="slide">
+            <div class="content">
+                <div style="text-align: center;">
+                    <span class="question-badge">F3 QUESTION</span>
+                </div>
+                <h2>Secret Surprise</h2>
+                <div class="description">Three layers: Dark chocolate (bottom 30mm), Vanilla cream (middle), Sphere on top</div>
+
+                <div class="note">Using similar triangles: at h=30, r = (21/90)×30 = 7 mm</div>
+
+                <div class="canvas-container">
+                    <canvas id="f3Canvas" width="400" height="500"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: F3 Answer -->
+        <div class="slide">
+            <div class="content">
+                <div style="text-align: center;">
+                    <span class="answer-badge">F3 ANSWER</span>
+                </div>
+                <h2>Secret Surprise</h2>
+
+                <div class="cost-item">
+                    <span class="cost-label">Chocolate cone (r=7, h=30):</span>
+                    <span class="cost-value">⅓×(22/7)×49×30 = 1540 mm³ → ₹4.62</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Vanilla cream (frustum − hemisphere inside):</span>
+                    <span class="cost-value">40,040 − 19,404 = 20,636 mm³ → ₹10.32</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Ice cream sphere:</span>
+                    <span class="cost-value">38,808 mm³ → ₹38.81</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Waffle cone:</span>
+                    <span class="cost-value">₹5.00</span>
+                </div>
+                <div class="note" style="font-size: 0.95em; margin-top: 10px;">Note: Half the sphere (hemisphere = 19,404 mm³) sits inside the cone, displacing cream!</div>
+
+                <div class="result">Total: ≈ ₹59</div>
+            </div>
+        </div>
+
+        <!-- Slide 8: F4 Question -->
+        <div class="slide">
+            <div class="content">
+                <div style="text-align: center;">
+                    <span class="question-badge">F4 QUESTION</span>
+                </div>
+                <h2>Cornetto Style</h2>
+                <div class="description">Chocolate bottom + vanilla cream + chocolate DISK on top (no sphere)</div>
+
+                <div class="note">Disk: r=21mm, thickness=5mm</div>
+
+                <div class="canvas-container">
+                    <canvas id="f4Canvas" width="400" height="500"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: F4 Answer -->
+        <div class="slide">
+            <div class="content">
+                <div style="text-align: center;">
+                    <span class="answer-badge">F4 ANSWER</span>
+                </div>
+                <h2>Cornetto Style</h2>
+
+                <div class="cost-item">
+                    <span class="cost-label">Chocolate cone (bottom):</span>
+                    <span class="cost-value">1540 mm³ → ₹4.62</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Vanilla cream (middle):</span>
+                    <span class="cost-value">40,040 mm³ → ₹20.02</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Chocolate disk (top):</span>
+                    <span class="cost-value">(22/7)×21²×5 = 6930 mm³ → ₹20.79</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Waffle cone:</span>
+                    <span class="cost-value">₹5.00</span>
+                </div>
+
+                <div class="result">Total: ≈ ₹50</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">Previous</button>
+        <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        document.getElementById('totalSlides').textContent = totalSlides;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+
+            document.getElementById('currentSlide').textContent = currentSlide + 1;
+
+            // Update button states
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+
+            // Draw canvas when slide becomes active
+            drawCurrentSlide();
+        }
+
+        function changeSlide(direction) {
+            showSlide(currentSlide + direction);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+
+        function drawCurrentSlide() {
+            if (currentSlide === 1) drawF1();
+            else if (currentSlide === 3) drawF2();
+            else if (currentSlide === 5) drawF3();
+            else if (currentSlide === 7) drawF4();
+        }
+
+        // F1: Empty cone + sphere on top
+        function drawF1() {
+            const canvas = document.getElementById('f1Canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const scale = 3;
+            const centerX = 200;
+            const coneTop = 150;
+            const coneHeight = 90 * scale;
+            const coneRadius = 21 * scale;
+
+            // Draw cone outline
+            ctx.strokeStyle = '#e8c47c';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(centerX - coneRadius, coneTop);
+            ctx.lineTo(centerX, coneTop + coneHeight);
+            ctx.lineTo(centerX + coneRadius, coneTop);
+            ctx.closePath();
+            ctx.stroke();
+
+            // Draw cone opening
+            ctx.beginPath();
+            ctx.ellipse(centerX, coneTop, coneRadius, coneRadius * 0.3, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Draw sphere on top
+            const sphereRadius = 21 * scale;
+            const sphereY = coneTop - sphereRadius;
+
+            ctx.fillStyle = '#7cc4e8';
+            ctx.beginPath();
+            ctx.arc(centerX, sphereY, sphereRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#5aa4c8';
+            ctx.stroke();
+
+            // Label
+            ctx.fillStyle = '#e0e0e0';
+            ctx.font = '16px Outfit';
+            ctx.textAlign = 'center';
+            ctx.fillText('Sphere on top', centerX, sphereY - sphereRadius - 15);
+            ctx.fillText('(38,808 mm³)', centerX, sphereY - sphereRadius - 0);
+            ctx.fillText('Empty cone', centerX, coneTop + coneHeight + 25);
+        }
+
+        // F2: Filled cone + hemisphere on top
+        function drawF2() {
+            const canvas = document.getElementById('f2Canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const scale = 3;
+            const centerX = 200;
+            const coneTop = 150;
+            const coneHeight = 90 * scale;
+            const coneRadius = 21 * scale;
+
+            // Draw filled cone (vanilla cream)
+            ctx.fillStyle = '#f5e6d3';
+            ctx.beginPath();
+            ctx.moveTo(centerX - coneRadius, coneTop);
+            ctx.lineTo(centerX, coneTop + coneHeight);
+            ctx.lineTo(centerX + coneRadius, coneTop);
+            ctx.closePath();
+            ctx.fill();
+
+            // Draw cone outline
+            ctx.strokeStyle = '#e8c47c';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Draw cone opening
+            ctx.beginPath();
+            ctx.ellipse(centerX, coneTop, coneRadius, coneRadius * 0.3, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#f5e6d3';
+            ctx.fill();
+            ctx.stroke();
+
+            // Draw hemisphere on top
+            const hemiRadius = 21 * scale;
+
+            ctx.fillStyle = '#e07860';
+            ctx.beginPath();
+            ctx.arc(centerX, coneTop, hemiRadius, Math.PI, 0, false);
+            ctx.lineTo(centerX + hemiRadius, coneTop);
+            ctx.lineTo(centerX - hemiRadius, coneTop);
+            ctx.fill();
+            ctx.strokeStyle = '#c05840';
+            ctx.stroke();
+
+            // Labels
+            ctx.fillStyle = '#e0e0e0';
+            ctx.font = '16px Outfit';
+            ctx.textAlign = 'center';
+            ctx.fillText('Premium hemisphere', centerX, coneTop - hemiRadius - 15);
+            ctx.fillText('(19,404 mm³)', centerX, coneTop - hemiRadius);
+            ctx.fillText('Vanilla cream', centerX, coneTop + coneHeight/2);
+            ctx.fillText('(41,580 mm³)', centerX, coneTop + coneHeight/2 + 20);
+        }
+
+        // F3: Three layers + sphere
+        function drawF3() {
+            const canvas = document.getElementById('f3Canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const scale = 3;
+            const centerX = 200;
+            const coneTop = 150;
+            const coneHeight = 90 * scale;
+            const coneRadius = 21 * scale;
+            const chocolateHeight = 30 * scale;
+            const chocolateRadius = 7 * scale;
+
+            // Draw chocolate cone (bottom)
+            ctx.fillStyle = '#4a2c2a';
+            ctx.beginPath();
+            ctx.moveTo(centerX - chocolateRadius, coneTop + coneHeight - chocolateHeight);
+            ctx.lineTo(centerX, coneTop + coneHeight);
+            ctx.lineTo(centerX + chocolateRadius, coneTop + coneHeight - chocolateHeight);
+            ctx.closePath();
+            ctx.fill();
+
+            // Draw vanilla frustum
+            ctx.fillStyle = '#f5e6d3';
+            ctx.beginPath();
+            ctx.moveTo(centerX - chocolateRadius, coneTop + coneHeight - chocolateHeight);
+            ctx.lineTo(centerX - coneRadius, coneTop);
+            ctx.lineTo(centerX + coneRadius, coneTop);
+            ctx.lineTo(centerX + chocolateRadius, coneTop + coneHeight - chocolateHeight);
+            ctx.closePath();
+            ctx.fill();
+
+            // Draw cone outline
+            ctx.strokeStyle = '#e8c47c';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(centerX - coneRadius, coneTop);
+            ctx.lineTo(centerX, coneTop + coneHeight);
+            ctx.lineTo(centerX + coneRadius, coneTop);
+            ctx.closePath();
+            ctx.stroke();
+
+            // Draw horizontal line separating layers
+            ctx.strokeStyle = '#e07860';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(centerX - chocolateRadius - 10, coneTop + coneHeight - chocolateHeight);
+            ctx.lineTo(centerX + chocolateRadius + 10, coneTop + coneHeight - chocolateHeight);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw cone opening
+            ctx.strokeStyle = '#e8c47c';
+            ctx.beginPath();
+            ctx.ellipse(centerX, coneTop, coneRadius, coneRadius * 0.3, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Draw sphere on top
+            const sphereRadius = 21 * scale;
+            const sphereY = coneTop - sphereRadius;
+
+            ctx.fillStyle = '#7cc4e8';
+            ctx.beginPath();
+            ctx.arc(centerX, sphereY, sphereRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#5aa4c8';
+            ctx.stroke();
+
+            // Labels
+            ctx.fillStyle = '#e0e0e0';
+            ctx.font = '14px Outfit';
+            ctx.textAlign = 'right';
+            ctx.fillText('Ice cream', centerX - sphereRadius - 10, sphereY);
+            ctx.fillText('sphere', centerX - sphereRadius - 10, sphereY + 15);
+
+            ctx.textAlign = 'left';
+            ctx.fillText('Vanilla', centerX + coneRadius + 10, coneTop + 30);
+            ctx.fillText('cream', centerX + coneRadius + 10, coneTop + 45);
+
+            ctx.fillText('Dark', centerX + chocolateRadius + 10, coneTop + coneHeight - 30);
+            ctx.fillText('chocolate', centerX + chocolateRadius + 10, coneTop + coneHeight - 15);
+        }
+
+        // F4: Cornetto style with disk
+        function drawF4() {
+            const canvas = document.getElementById('f4Canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const scale = 3;
+            const centerX = 200;
+            const coneTop = 150;
+            const coneHeight = 90 * scale;
+            const coneRadius = 21 * scale;
+            const chocolateHeight = 30 * scale;
+            const chocolateRadius = 7 * scale;
+            const diskThickness = 5 * scale;
+
+            // Draw chocolate cone (bottom)
+            ctx.fillStyle = '#4a2c2a';
+            ctx.beginPath();
+            ctx.moveTo(centerX - chocolateRadius, coneTop + coneHeight - chocolateHeight);
+            ctx.lineTo(centerX, coneTop + coneHeight);
+            ctx.lineTo(centerX + chocolateRadius, coneTop + coneHeight - chocolateHeight);
+            ctx.closePath();
+            ctx.fill();
+
+            // Draw vanilla frustum
+            ctx.fillStyle = '#f5e6d3';
+            ctx.beginPath();
+            ctx.moveTo(centerX - chocolateRadius, coneTop + coneHeight - chocolateHeight);
+            ctx.lineTo(centerX - coneRadius, coneTop);
+            ctx.lineTo(centerX + coneRadius, coneTop);
+            ctx.lineTo(centerX + chocolateRadius, coneTop + coneHeight - chocolateHeight);
+            ctx.closePath();
+            ctx.fill();
+
+            // Draw cone outline
+            ctx.strokeStyle = '#e8c47c';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(centerX - coneRadius, coneTop);
+            ctx.lineTo(centerX, coneTop + coneHeight);
+            ctx.lineTo(centerX + coneRadius, coneTop);
+            ctx.closePath();
+            ctx.stroke();
+
+            // Draw horizontal line separating layers
+            ctx.strokeStyle = '#e07860';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(centerX - chocolateRadius - 10, coneTop + coneHeight - chocolateHeight);
+            ctx.lineTo(centerX + chocolateRadius + 10, coneTop + coneHeight - chocolateHeight);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw cone opening
+            ctx.strokeStyle = '#e8c47c';
+            ctx.beginPath();
+            ctx.ellipse(centerX, coneTop, coneRadius, coneRadius * 0.3, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Draw chocolate disk on top
+            const diskTop = coneTop - diskThickness;
+
+            // Disk side (cylinder)
+            ctx.fillStyle = '#4a2c2a';
+            ctx.fillRect(centerX - coneRadius, diskTop, coneRadius * 2, diskThickness);
+
+            // Disk top ellipse
+            ctx.beginPath();
+            ctx.ellipse(centerX, diskTop, coneRadius, coneRadius * 0.3, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#2a1c1a';
+            ctx.stroke();
+
+            // Disk bottom ellipse
+            ctx.beginPath();
+            ctx.ellipse(centerX, coneTop, coneRadius, coneRadius * 0.3, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#3a2222';
+            ctx.fill();
+
+            // Labels
+            ctx.fillStyle = '#e0e0e0';
+            ctx.font = '14px Outfit';
+            ctx.textAlign = 'center';
+            ctx.fillText('Chocolate disk', centerX, diskTop - 10);
+            ctx.fillText('(6930 mm³)', centerX, diskTop - 25);
+
+            ctx.textAlign = 'left';
+            ctx.fillText('Vanilla', centerX + coneRadius + 10, coneTop + 30);
+            ctx.fillText('cream', centerX + coneRadius + 10, coneTop + 45);
+
+            ctx.fillText('Dark', centerX + chocolateRadius + 10, coneTop + coneHeight - 30);
+            ctx.fillText('chocolate', centerX + chocolateRadius + 10, coneTop + coneHeight - 15);
+        }
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>

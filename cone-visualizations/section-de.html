@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sphere: Surface Area and Volume</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0f;
+            color: #e8e8e8;
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .slideshow-container {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            padding: 4rem;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide-content {
+            background: #1a1a24;
+            border-radius: 24px;
+            padding: 3rem;
+            max-width: 1200px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #e8c47c;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #7cc4e8;
+            margin-bottom: 1.5rem;
+        }
+
+        .formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3rem;
+            color: #e8c47c;
+            text-align: center;
+            padding: 2rem;
+            background: rgba(232, 196, 124, 0.1);
+            border-radius: 16px;
+            margin: 2rem 0;
+            border: 2px solid rgba(232, 196, 124, 0.3);
+        }
+
+        .caption {
+            font-size: 1.3rem;
+            color: #7ce8b4;
+            text-align: center;
+            margin-top: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .question {
+            font-size: 1.5rem;
+            color: #e8e8e8;
+            line-height: 1.8;
+            margin: 1rem 0;
+        }
+
+        .question-item {
+            margin: 0.8rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .calculation {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.4rem;
+            line-height: 2.2;
+            margin: 1rem 0;
+            padding: 1.5rem;
+            background: rgba(124, 196, 232, 0.1);
+            border-radius: 12px;
+            border-left: 4px solid #7cc4e8;
+        }
+
+        .step {
+            margin: 1rem 0;
+            color: #e8e8e8;
+        }
+
+        .answer {
+            color: #7ce8b4;
+            font-weight: 600;
+            font-size: 1.6rem;
+        }
+
+        canvas {
+            display: block;
+            margin: 2rem auto;
+            max-width: 100%;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: #1a1a24;
+            color: #e8c47c;
+            border: 2px solid #e8c47c;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #e8c47c;
+            color: #0a0a0f;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .nav-btn:disabled:hover {
+            background: #1a1a24;
+            color: #e8c47c;
+            transform: none;
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            color: #7cc4e8;
+            background: #1a1a24;
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+        }
+
+        .visual-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        sup {
+            font-size: 0.6em;
+            vertical-align: super;
+        }
+
+        .note {
+            font-size: 1.2rem;
+            color: #e07860;
+            font-style: italic;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <a href="main.html" style="position: fixed; top: 2rem; left: 2rem; color: #e8c47c; text-decoration: none; font-size: 0.9rem; z-index: 1000;">&larr; Back to Home</a>
+    <div class="slideshow-container">
+        <!-- Slide 1: Surface Area Formula -->
+        <div class="slide active">
+            <div class="slide-content">
+                <h1>Surface Area of a Sphere</h1>
+                <div class="formula">Surface Area = 4πr²</div>
+                <canvas id="sphereCanvas1" width="800" height="400"></canvas>
+                <div class="caption">The surface area equals 4 times the area of a circle with the same radius</div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Question D2 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Question D2: Painting the Moon</h2>
+                <div class="question">
+                    <p>A theme park builds a Moon model</p>
+                    <div class="question-item">• Sphere radius = 21 meters</div>
+                    <div class="question-item">• Paint thickness = 1 mm = 0.001 m</div>
+                    <div class="question-item">• How many liters of paint needed?</div>
+                </div>
+                <canvas id="sphereCanvas2" width="600" height="600"></canvas>
+            </div>
+        </div>
+
+        <!-- Slide 3: Answer D2 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Answer D2: Painting the Moon</h2>
+                <div class="calculation">
+                    <div class="step">1. Surface Area = 4 × (22/7) × 21 × 21</div>
+                    <div class="step" style="padding-left: 2rem;">= 4 × 22 × 63</div>
+                    <div class="step" style="padding-left: 2rem;">= <span class="answer">5544 m²</span></div>
+
+                    <div class="step" style="margin-top: 1.5rem;">2. Paint volume = Surface Area × Thickness</div>
+                    <div class="step" style="padding-left: 2rem;">= 5544 × 0.001</div>
+                    <div class="step" style="padding-left: 2rem;">= <span class="answer">5.544 m³</span></div>
+
+                    <div class="step" style="margin-top: 1.5rem;">3. Convert to liters: 5.544 × 1000</div>
+                    <div class="step" style="padding-left: 2rem;">= <span class="answer">5544 liters</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Volume Formula -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>Volume of a Sphere</h1>
+                <div class="formula">Volume of Sphere = (4/3)πr³</div>
+                <div class="formula" style="margin-top: 3rem;">Volume of Hemisphere = (2/3)πr³</div>
+                <canvas id="sphereCanvas4" width="800" height="400"></canvas>
+            </div>
+        </div>
+
+        <!-- Slide 5: Question E2 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Question E2: Ice Cream Scoop</h2>
+                <div class="question">
+                    <p>Calculate the volume of a spherical ice cream scoop</p>
+                    <div class="question-item">• Radius = 21 mm</div>
+                </div>
+                <canvas id="sphereCanvas5" width="500" height="500"></canvas>
+            </div>
+        </div>
+
+        <!-- Slide 6: Answer E2 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Answer E2: Ice Cream Scoop</h2>
+                <div class="calculation">
+                    <div class="step">V = (4/3) × π × r³</div>
+                    <div class="step">V = (4/3) × (22/7) × 21³</div>
+                    <div class="step">V = (4/3) × (22/7) × 9261</div>
+                    <div class="step" style="padding-left: 2rem;">= (4 × 22 × 9261) / (3 × 7)</div>
+                    <div class="step" style="padding-left: 2rem;">= (88 × 9261) / 21</div>
+                    <div class="step" style="padding-left: 2rem;">= 814968 / 21</div>
+                    <div class="step" style="padding-left: 2rem;">= <span class="answer">38,808 mm³</span></div>
+                    <div class="note">(≈ 38.8 ml)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-counter">
+        <span id="currentSlide">1</span> / <span id="totalSlides">6</span>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">Previous</button>
+        <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        document.getElementById('totalSlides').textContent = totalSlides;
+
+        function showSlide(n) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[n].classList.add('active');
+
+            document.getElementById('currentSlide').textContent = n + 1;
+            document.getElementById('prevBtn').disabled = n === 0;
+            document.getElementById('nextBtn').disabled = n === totalSlides - 1;
+
+            // Draw canvas for current slide
+            drawCurrentSlide(n);
+        }
+
+        function changeSlide(direction) {
+            currentSlide += direction;
+            if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+            if (currentSlide < 0) currentSlide = 0;
+            showSlide(currentSlide);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+
+        function drawCurrentSlide(slideIndex) {
+            switch(slideIndex) {
+                case 0:
+                    drawSlide1();
+                    break;
+                case 1:
+                    drawSlide2();
+                    break;
+                case 3:
+                    drawSlide4();
+                    break;
+                case 4:
+                    drawSlide5();
+                    break;
+            }
+        }
+
+        // Slide 1: Sphere with 4 circles
+        function drawSlide1() {
+            const canvas = document.getElementById('sphereCanvas1');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = 200;
+            const centerY = 200;
+            const radius = 100;
+
+            // Draw main sphere
+            const gradient = ctx.createRadialGradient(
+                centerX - 30, centerY - 30, 10,
+                centerX, centerY, radius
+            );
+            gradient.addColorStop(0, '#7cc4e8');
+            gradient.addColorStop(1, '#1a1a24');
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.strokeStyle = '#7cc4e8';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Draw 4 circles
+            const circlePositions = [
+                { x: 500, y: 100 },
+                { x: 650, y: 100 },
+                { x: 500, y: 250 },
+                { x: 650, y: 250 }
+            ];
+
+            circlePositions.forEach(pos => {
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 70, 0, 2 * Math.PI);
+                ctx.fillStyle = 'rgba(232, 196, 124, 0.2)';
+                ctx.fill();
+                ctx.strokeStyle = '#e8c47c';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+
+            // Draw arrow
+            ctx.strokeStyle = '#7ce8b4';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(320, 200);
+            ctx.lineTo(420, 175);
+            ctx.stroke();
+
+            // Arrow head
+            ctx.beginPath();
+            ctx.moveTo(420, 175);
+            ctx.lineTo(410, 170);
+            ctx.lineTo(410, 180);
+            ctx.closePath();
+            ctx.fillStyle = '#7ce8b4';
+            ctx.fill();
+        }
+
+        // Slide 2: Large Moon sphere
+        function drawSlide2() {
+            const canvas = document.getElementById('sphereCanvas2');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = 300;
+            const centerY = 300;
+            const radius = 200;
+
+            // Draw sphere with moon-like appearance
+            const gradient = ctx.createRadialGradient(
+                centerX - 60, centerY - 60, 20,
+                centerX, centerY, radius
+            );
+            gradient.addColorStop(0, '#e8e8e8');
+            gradient.addColorStop(0.5, '#b0b0b0');
+            gradient.addColorStop(1, '#4a4a4a');
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.strokeStyle = '#e8c47c';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // Add some craters
+            const craters = [
+                { x: 250, y: 250, r: 30 },
+                { x: 350, y: 300, r: 25 },
+                { x: 280, y: 350, r: 20 },
+                { x: 370, y: 230, r: 15 }
+            ];
+
+            craters.forEach(crater => {
+                ctx.beginPath();
+                ctx.arc(crater.x, crater.y, crater.r, 0, 2 * Math.PI);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.fill();
+            });
+
+            // Draw radius line
+            ctx.strokeStyle = '#e07860';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([10, 5]);
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(centerX + radius, centerY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Label
+            ctx.fillStyle = '#e07860';
+            ctx.font = 'bold 24px JetBrains Mono';
+            ctx.fillText('r = 21m', centerX + 80, centerY - 10);
+        }
+
+        // Slide 4: Sphere and Hemisphere
+        function drawSlide4() {
+            const canvas = document.getElementById('sphereCanvas4');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Full Sphere
+            const sphere1X = 250;
+            const sphere1Y = 200;
+            const radius = 120;
+
+            const gradient1 = ctx.createRadialGradient(
+                sphere1X - 40, sphere1Y - 40, 10,
+                sphere1X, sphere1Y, radius
+            );
+            gradient1.addColorStop(0, '#e8c47c');
+            gradient1.addColorStop(1, '#1a1a24');
+
+            ctx.beginPath();
+            ctx.arc(sphere1X, sphere1Y, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = gradient1;
+            ctx.fill();
+            ctx.strokeStyle = '#e8c47c';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.fillStyle = '#e8e8e8';
+            ctx.font = 'bold 20px Outfit';
+            ctx.textAlign = 'center';
+            ctx.fillText('Sphere', sphere1X, sphere1Y + radius + 40);
+
+            // Hemisphere
+            const sphere2X = 550;
+            const sphere2Y = 200;
+
+            const gradient2 = ctx.createRadialGradient(
+                sphere2X - 40, sphere2Y - 40, 10,
+                sphere2X, sphere2Y, radius
+            );
+            gradient2.addColorStop(0, '#7ce8b4');
+            gradient2.addColorStop(1, '#1a1a24');
+
+            // Draw hemisphere (top half)
+            ctx.beginPath();
+            ctx.arc(sphere2X, sphere2Y, radius, Math.PI, 2 * Math.PI);
+            ctx.fillStyle = gradient2;
+            ctx.fill();
+            ctx.strokeStyle = '#7ce8b4';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Draw base
+            ctx.beginPath();
+            ctx.ellipse(sphere2X, sphere2Y, radius, radius * 0.3, 0, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(124, 232, 180, 0.3)';
+            ctx.fill();
+            ctx.strokeStyle = '#7ce8b4';
+            ctx.stroke();
+
+            ctx.fillStyle = '#e8e8e8';
+            ctx.fillText('Hemisphere', sphere2X, sphere2Y + radius + 40);
+        }
+
+        // Slide 5: Ice cream scoop
+        function drawSlide5() {
+            const canvas = document.getElementById('sphereCanvas5');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = 250;
+            const coneTopY = 220;
+            const coneRadius = 70;  // Cone opening radius
+            const coneHeight = 180;
+            const scoopRadius = 70; // Same as cone opening so it sits nicely
+
+            // Draw cone first (behind the scoop)
+            ctx.beginPath();
+            ctx.moveTo(centerX - coneRadius, coneTopY);
+            ctx.lineTo(centerX, coneTopY + coneHeight);
+            ctx.lineTo(centerX + coneRadius, coneTopY);
+            ctx.closePath();
+            ctx.fillStyle = '#d4a574';
+            ctx.fill();
+            ctx.strokeStyle = '#a08050';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Cone waffle pattern
+            ctx.strokeStyle = '#b8956a';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 7; i++) {
+                const t = i / 6;
+                const y = coneTopY + t * coneHeight;
+                const halfWidth = coneRadius * (1 - t);
+                ctx.beginPath();
+                ctx.moveTo(centerX - halfWidth, y);
+                ctx.lineTo(centerX + halfWidth, y);
+                ctx.stroke();
+            }
+
+            // Draw cone opening ellipse
+            ctx.beginPath();
+            ctx.ellipse(centerX, coneTopY, coneRadius, coneRadius * 0.25, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#c49564';
+            ctx.fill();
+            ctx.strokeStyle = '#a08050';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Draw ice cream scoop (sphere sitting on cone)
+            const scoopCenterY = coneTopY - scoopRadius * 0.7; // Slightly embedded
+
+            const gradient = ctx.createRadialGradient(
+                centerX - 25, scoopCenterY - 25, 10,
+                centerX, scoopCenterY, scoopRadius
+            );
+            gradient.addColorStop(0, '#ffe8d0');
+            gradient.addColorStop(0.5, '#e07860');
+            gradient.addColorStop(1, '#c05040');
+
+            ctx.beginPath();
+            ctx.arc(centerX, scoopCenterY, scoopRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.strokeStyle = '#e07860';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Radius line on scoop
+            ctx.strokeStyle = '#7cc4e8';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([6, 4]);
+            ctx.beginPath();
+            ctx.moveTo(centerX, scoopCenterY);
+            ctx.lineTo(centerX + scoopRadius, scoopCenterY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Label
+            ctx.fillStyle = '#7cc4e8';
+            ctx.font = 'bold 18px JetBrains Mono';
+            ctx.textAlign = 'center';
+            ctx.fillText('r = 21mm', centerX + scoopRadius / 2 + 10, scoopCenterY - 15);
+        }
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>

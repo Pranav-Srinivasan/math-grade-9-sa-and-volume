@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cone Surface Area - Interactive Visualization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0a0a0f;
+            color: #e8e8ea;
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+        }
+
+        /* Subtle noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            z-index: -1;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #e8c47c;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7cc4e8;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: #1a1a24;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #e8c47c;
+            margin-bottom: 1.5rem;
+        }
+
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        #coneCanvas {
+            border-radius: 8px;
+            background: #0a0a0f;
+        }
+
+        .slider-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            color: #7cc4e8;
+        }
+
+        .slider-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            color: #e8c47c;
+            font-size: 1.1rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, #e07860, #7ce8b4);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #e8c47c;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(232, 196, 124, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 4px 12px rgba(232, 196, 124, 0.6);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #e8c47c;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(232, 196, 124, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 4px 12px rgba(232, 196, 124, 0.6);
+        }
+
+        .observation {
+            background: linear-gradient(135deg, rgba(232, 196, 124, 0.1), rgba(124, 196, 232, 0.1));
+            border-left: 4px solid #e8c47c;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .observation.visible {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .observation-title {
+            font-weight: 600;
+            color: #e8c47c;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .observation-text {
+            color: #e8e8ea;
+            line-height: 1.6;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .value-box {
+            background: #0a0a0f;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(232, 196, 124, 0.2);
+        }
+
+        .value-label {
+            font-size: 0.9rem;
+            color: #7cc4e8;
+            margin-bottom: 0.5rem;
+        }
+
+        .value-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #e8c47c;
+        }
+
+        .value-unit {
+            font-size: 0.85rem;
+            color: #7ce8b4;
+            margin-left: 0.25rem;
+        }
+
+        .formula-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .formula-title {
+            font-weight: 600;
+            color: #7cc4e8;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .formula {
+            background: #0a0a0f;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #e8c47c;
+            margin-bottom: 0.75rem;
+            border: 1px solid rgba(124, 196, 232, 0.2);
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .calculation {
+            background: linear-gradient(135deg, rgba(124, 228, 180, 0.1), rgba(124, 196, 232, 0.1));
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(124, 228, 180, 0.3);
+        }
+
+        .calc-step {
+            font-family: 'JetBrains Mono', monospace;
+            color: #e8e8ea;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .calc-result {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.3rem;
+            color: #7ce8b4;
+            font-weight: 600;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(124, 228, 180, 0.3);
+        }
+
+        .highlight {
+            color: #e8c47c;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .values-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="main.html" style="display: inline-block; margin-bottom: 1rem; color: #e8c47c; text-decoration: none; font-size: 0.9rem;">&larr; Back to Home</a>
+        <h1>Cone Surface Area Exploration</h1>
+        <p class="subtitle">Discover what happens to a cone's curved surface area as its height changes</p>
+
+        <div class="main-content">
+            <div class="card">
+                <h2>Interactive Cone</h2>
+                <div class="canvas-container">
+                    <canvas id="coneCanvas" width="400" height="400"></canvas>
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Height (h)</span>
+                        <span class="slider-value" id="heightValue">20 mm</span>
+                    </div>
+                    <input type="range" id="heightSlider" min="0" max="40" value="20" step="0.5">
+                </div>
+
+                <div class="observation" id="observation">
+                    <div class="observation-title">Key Observation!</div>
+                    <div class="observation-text">
+                        When height = 0, the cone becomes completely flat, forming a circle.
+                        At this point, the curved surface area equals the base area: CSA = πr²
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Measurements & Calculations</h2>
+
+                <div class="values-grid">
+                    <div class="value-box">
+                        <div class="value-label">Height (h)</div>
+                        <div class="value-number" id="heightDisplay">20<span class="value-unit">mm</span></div>
+                    </div>
+                    <div class="value-box">
+                        <div class="value-label">Radius (r)</div>
+                        <div class="value-number">21<span class="value-unit">mm</span></div>
+                    </div>
+                    <div class="value-box">
+                        <div class="value-label">Slant Height (l)</div>
+                        <div class="value-number" id="slantDisplay">29<span class="value-unit">mm</span></div>
+                    </div>
+                </div>
+
+                <div class="formula-section">
+                    <div class="formula-title">Formulas</div>
+                    <div class="formula">l² = r² + h²</div>
+                    <div class="formula">CSA = πrl</div>
+                </div>
+
+                <div class="calculation">
+                    <div class="calc-step" id="step1">l² = 21² + 20² = 441 + 400 = 841</div>
+                    <div class="calc-step" id="step2">l = √841 = 29 mm</div>
+                    <div class="calc-step" id="step3">CSA = (22/7) × 21 × 29</div>
+                    <div class="calc-step" id="step4">CSA = 22 × 3 × 29</div>
+                    <div class="calc-result" id="csaResult">CSA = 1914 mm²</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('coneCanvas');
+        const ctx = canvas.getContext('2d');
+        const heightSlider = document.getElementById('heightSlider');
+        const heightValue = document.getElementById('heightValue');
+        const heightDisplay = document.getElementById('heightDisplay');
+        const slantDisplay = document.getElementById('slantDisplay');
+        const observation = document.getElementById('observation');
+
+        const RADIUS = 21; // Fixed radius in mm
+        const PI = 22/7; // Using 22/7 for π
+
+        function drawCone(height) {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Scale for visualization
+            const scale = 4;
+            const centerX = canvas.width / 2;
+            const baseY = 320;
+            const topY = baseY - (height * scale);
+            const radiusScaled = RADIUS * scale;
+
+            if (height === 0) {
+                // Draw flat circle when height is 0
+                ctx.beginPath();
+                ctx.arc(centerX, baseY, radiusScaled, 0, 2 * Math.PI);
+                ctx.fillStyle = 'rgba(232, 196, 124, 0.3)';
+                ctx.fill();
+                ctx.strokeStyle = '#e8c47c';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw center point
+                ctx.beginPath();
+                ctx.arc(centerX, baseY, 4, 0, 2 * Math.PI);
+                ctx.fillStyle = '#e8c47c';
+                ctx.fill();
+
+                // Label
+                ctx.fillStyle = '#7cc4e8';
+                ctx.font = '16px Outfit';
+                ctx.textAlign = 'center';
+                ctx.fillText('Flat Circle (h = 0)', centerX, baseY - radiusScaled - 20);
+            } else {
+                // Draw 3D cone
+
+                // Draw back edge (dashed)
+                ctx.beginPath();
+                ctx.moveTo(centerX - radiusScaled, baseY);
+                ctx.lineTo(centerX, topY);
+                ctx.strokeStyle = 'rgba(124, 196, 232, 0.4)';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Draw base ellipse
+                ctx.beginPath();
+                ctx.ellipse(centerX, baseY, radiusScaled, radiusScaled * 0.3, 0, 0, 2 * Math.PI);
+                ctx.fillStyle = 'rgba(232, 196, 124, 0.2)';
+                ctx.fill();
+                ctx.strokeStyle = '#e8c47c';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw cone surface (gradient)
+                const gradient = ctx.createLinearGradient(centerX, topY, centerX, baseY);
+                gradient.addColorStop(0, 'rgba(124, 228, 180, 0.4)');
+                gradient.addColorStop(1, 'rgba(232, 196, 124, 0.3)');
+
+                ctx.beginPath();
+                ctx.moveTo(centerX, topY);
+                ctx.lineTo(centerX - radiusScaled, baseY);
+                ctx.arc(centerX, baseY, radiusScaled, Math.PI, 0);
+                ctx.lineTo(centerX, topY);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                // Draw front edges
+                ctx.beginPath();
+                ctx.moveTo(centerX - radiusScaled, baseY);
+                ctx.lineTo(centerX, topY);
+                ctx.lineTo(centerX + radiusScaled, baseY);
+                ctx.strokeStyle = '#7cc4e8';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw apex point
+                ctx.beginPath();
+                ctx.arc(centerX, topY, 4, 0, 2 * Math.PI);
+                ctx.fillStyle = '#e8c47c';
+                ctx.fill();
+
+                // Draw measurements
+                drawMeasurement(centerX, topY, centerX, baseY, 'h = ' + height + ' mm', true);
+                drawMeasurement(centerX, baseY, centerX + radiusScaled, baseY, 'r = 21 mm', false);
+
+                const slant = Math.sqrt(RADIUS * RADIUS + height * height);
+                drawMeasurement(centerX, topY, centerX + radiusScaled, baseY, 'l = ' + slant.toFixed(1) + ' mm', true, true);
+            }
+        }
+
+        function drawMeasurement(x1, y1, x2, y2, label, vertical = false, slant = false) {
+            const offset = 20;
+
+            ctx.save();
+            ctx.strokeStyle = '#e07860';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 3]);
+
+            if (vertical && !slant) {
+                // Height measurement
+                const x = x2 + offset;
+                ctx.beginPath();
+                ctx.moveTo(x, y1);
+                ctx.lineTo(x, y2);
+                ctx.stroke();
+
+                // Arrows
+                ctx.setLineDash([]);
+                drawArrow(x, y1, x, y1 + 10);
+                drawArrow(x, y2, x, y2 - 10);
+
+                // Label
+                ctx.fillStyle = '#e07860';
+                ctx.font = '14px JetBrains Mono';
+                ctx.textAlign = 'left';
+                ctx.fillText(label, x + 10, (y1 + y2) / 2 + 5);
+            } else if (slant) {
+                // Slant height
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.strokeStyle = '#7ce8b4';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                ctx.fillStyle = '#7ce8b4';
+                ctx.font = '14px JetBrains Mono';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, (x1 + x2) / 2 + 30, (y1 + y2) / 2);
+            } else {
+                // Radius measurement
+                const y = y2 + offset;
+                ctx.beginPath();
+                ctx.moveTo(x1, y);
+                ctx.lineTo(x2, y);
+                ctx.stroke();
+
+                // Arrows
+                ctx.setLineDash([]);
+                drawArrow(x1, y, x1 + 10, y);
+                drawArrow(x2, y, x2 - 10, y);
+
+                // Label
+                ctx.fillStyle = '#e07860';
+                ctx.font = '14px JetBrains Mono';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, (x1 + x2) / 2, y + 20);
+            }
+
+            ctx.restore();
+        }
+
+        function drawArrow(x, y, dx, dy) {
+            const angle = Math.atan2(dy - y, dx - x);
+            ctx.beginPath();
+            ctx.moveTo(dx, dy);
+            ctx.lineTo(dx - 8 * Math.cos(angle - Math.PI / 6), dy - 8 * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(dx - 8 * Math.cos(angle + Math.PI / 6), dy - 8 * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fillStyle = '#e07860';
+            ctx.fill();
+        }
+
+        function updateCalculations(height) {
+            const h = height;
+            const r = RADIUS;
+
+            // Calculate slant height
+            const lSquared = r * r + h * h;
+            const l = Math.sqrt(lSquared);
+
+            // Calculate CSA
+            const csa = PI * r * l;
+
+            // Update displays
+            heightValue.textContent = h.toFixed(1) + ' mm';
+            heightDisplay.innerHTML = h.toFixed(1) + '<span class="value-unit">mm</span>';
+            slantDisplay.innerHTML = l.toFixed(1) + '<span class="value-unit">mm</span>';
+
+            // Show/hide observation
+            if (h === 0) {
+                observation.classList.add('visible');
+            } else {
+                observation.classList.remove('visible');
+            }
+
+            // Update calculation steps
+            document.getElementById('step1').textContent =
+                `l² = ${r}² + ${h.toFixed(1)}² = ${r*r} + ${(h*h).toFixed(1)} = ${lSquared.toFixed(1)}`;
+            document.getElementById('step2').textContent =
+                `l = √${lSquared.toFixed(1)} = ${l.toFixed(1)} mm`;
+
+            if (h === 0) {
+                document.getElementById('step3').textContent =
+                    `CSA = (22/7) × 21 × 0 = 0`;
+                document.getElementById('step4').textContent =
+                    `When h = 0, cone is flat (circle)`;
+                document.getElementById('csaResult').textContent =
+                    `CSA = 0 mm²`;
+            } else {
+                const csaStep1 = (22 * r * l) / 7;
+                document.getElementById('step3').textContent =
+                    `CSA = (22/7) × ${r} × ${l.toFixed(1)}`;
+                document.getElementById('step4').textContent =
+                    `CSA = 22 × ${r/7} × ${l.toFixed(1)}`;
+                document.getElementById('csaResult').textContent =
+                    `CSA = ${csa.toFixed(2)} mm²`;
+            }
+        }
+
+        // Event listener
+        heightSlider.addEventListener('input', (e) => {
+            const height = parseFloat(e.target.value);
+            drawCone(height);
+            updateCalculations(height);
+        });
+
+        // Initial draw
+        drawCone(20);
+        updateCalculations(20);
+    </script>
+</body>
+</html>

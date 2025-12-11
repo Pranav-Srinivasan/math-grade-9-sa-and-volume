@@ -1,0 +1,1983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surface Areas & Volumes — Interactive Explorations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --text-primary: #f5f5f0;
+            --text-secondary: #a8a8b0;
+            --text-muted: #6b6b78;
+            --accent-warm: #e8c47c;
+            --accent-coral: #e07860;
+            --accent-ice: #7cc4e8;
+            --accent-mint: #7ce8b4;
+            --border: rgba(255,255,255,0.08);
+            --shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            z-index: 9999;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to bottom, var(--bg-primary), transparent);
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent-warm);
+            letter-spacing: 0.05em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 400;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 6rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 800px;
+            height: 800px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(232,196,124,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-warm);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards;
+        }
+
+        .hero h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 400;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease 0.2s forwards;
+        }
+
+        .hero h1 span {
+            font-style: italic;
+            color: var(--accent-warm);
+        }
+
+        .hero-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin-bottom: 3rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease 0.4s forwards;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease 0.6s forwards;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--accent-warm);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(232,196,124,0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-secondary);
+        }
+
+        /* Section Styles */
+        section {
+            padding: 8rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .section-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-coral);
+            letter-spacing: 0.2em;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 400;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Visualization Container */
+        .viz-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 3rem;
+            box-shadow: var(--shadow);
+        }
+
+        .viz-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        @media (max-width: 900px) {
+            .viz-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Canvas Container */
+        .canvas-wrapper {
+            position: relative;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, rgba(232,196,124,0.02) 0%, rgba(224,120,96,0.02) 100%);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .canvas-wrapper canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .control-label span:first-child {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .control-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            color: var(--accent-warm);
+        }
+
+        /* Custom Range Slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-warm);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(232,196,124,0.4);
+        }
+
+        /* Formula Display */
+        .formula-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+        }
+
+        .formula-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+        }
+
+        .formula {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-style: italic;
+            color: var(--text-primary);
+        }
+
+        .formula .highlight {
+            color: var(--accent-warm);
+            font-weight: 600;
+        }
+
+        /* Results Display */
+        .results {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .result-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .result-card.full-width {
+            grid-column: span 2;
+        }
+
+        .result-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.25rem;
+            color: var(--accent-ice);
+        }
+
+        .result-value.accent-coral {
+            color: var(--accent-coral);
+        }
+
+        .result-value.accent-mint {
+            color: var(--accent-mint);
+        }
+
+        /* Observation Box */
+        .observation {
+            background: linear-gradient(135deg, rgba(232,196,124,0.1) 0%, rgba(224,120,96,0.05) 100%);
+            border-left: 3px solid var(--accent-warm);
+            padding: 1.25rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+
+        .observation-title {
+            font-size: 0.75rem;
+            color: var(--accent-warm);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .observation p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Slideshow Section */
+        .slideshow-container {
+            position: relative;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .slide {
+            display: none;
+            padding: 4rem;
+            min-height: 600px;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .slide-type {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .slide-type.question {
+            background: rgba(224,120,96,0.2);
+            color: var(--accent-coral);
+        }
+
+        .slide-type.answer {
+            background: rgba(124,228,180,0.2);
+            color: var(--accent-mint);
+        }
+
+        .slide-type.context {
+            background: rgba(232,196,124,0.2);
+            color: var(--accent-warm);
+        }
+
+        .slide-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .slide-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        @media (max-width: 900px) {
+            .slide-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+
+        .slide-text h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+        }
+
+        .slide-text p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .slide-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide-visual canvas {
+            max-width: 100%;
+            border-radius: 0.5rem;
+        }
+
+        /* Data Display in Slides */
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .data-item {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .data-item label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.25rem;
+        }
+
+        .data-item span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            color: var(--accent-warm);
+        }
+
+        /* Solution Box */
+        .solution-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .solution-step {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: flex-start;
+        }
+
+        .solution-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            background: var(--accent-coral);
+            color: var(--bg-primary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content p {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .step-content .math {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .final-answer {
+            background: linear-gradient(135deg, rgba(124,228,180,0.15) 0%, rgba(124,196,232,0.1) 100%);
+            border: 1px solid rgba(124,228,180,0.3);
+            border-radius: 0.5rem;
+            padding: 1rem 1.5rem;
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .final-answer-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-mint);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg-primary);
+            font-weight: 600;
+        }
+
+        .final-answer span {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-mint);
+            font-size: 1.1rem;
+        }
+
+        /* Slideshow Navigation */
+        .slide-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 4rem;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+        }
+
+        .slide-progress {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .progress-dot.active {
+            background: var(--accent-warm);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .slide-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .slide-btn {
+            padding: 0.75rem 1.5rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 0.25rem;
+        }
+
+        .slide-btn:hover {
+            background: var(--accent-warm);
+            border-color: var(--accent-warm);
+            color: var(--bg-primary);
+        }
+
+        .slide-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .slide-btn:disabled:hover {
+            background: transparent;
+            color: var(--text-primary);
+            border-color: var(--border);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 4rem 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Animations */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">Geometry Lab</div>
+        <ul class="nav-links">
+            <li><a href="#surface-area">Surface Area</a></li>
+            <li><a href="#volume">Volume</a></li>
+            <li><a href="#ice-cream">Ice Cream Problems</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <span class="hero-badge">Chapter 11 • Class 9</span>
+        <h1>Surface Areas <span>&</span> Volumes</h1>
+        <p class="hero-subtitle">Interactive explorations of cones, spheres, and hemispheres through hands-on visualizations</p>
+        <div class="hero-cta">
+            <a href="#surface-area" class="btn btn-primary">Start Exploring</a>
+            <a href="#ice-cream" class="btn btn-secondary">See Problems</a>
+        </div>
+    </section>
+
+    <!-- Surface Area of Cone -->
+    <section id="surface-area">
+        <div class="section-header">
+            <p class="section-number">01</p>
+            <h2 class="section-title">Surface Area of a Cone</h2>
+            <p class="section-subtitle">Drag the height to see how the curved surface area changes. Watch what happens when height becomes zero.</p>
+        </div>
+
+        <div class="viz-container">
+            <div class="viz-grid">
+                <div class="canvas-wrapper">
+                    <canvas id="coneCanvas" width="500" height="500"></canvas>
+                </div>
+                <div class="controls">
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Height (h)</span>
+                            <span class="control-value" id="heightValue">15 cm</span>
+                        </div>
+                        <input type="range" id="heightSlider" min="0" max="20" value="15" step="0.5">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Radius (r)</span>
+                            <span class="control-value" id="radiusValue">8 cm</span>
+                        </div>
+                        <input type="range" id="radiusSlider" min="2" max="15" value="8" step="0.5">
+                    </div>
+
+                    <div class="formula-box">
+                        <p class="formula-title">Formulas</p>
+                        <p class="formula">l = √(r² + h²) <span style="color: var(--text-muted); font-size: 0.9rem;">← Slant Height</span></p>
+                        <p class="formula" style="margin-top: 0.5rem;">CSA = <span class="highlight">πrl</span></p>
+                    </div>
+
+                    <div class="results">
+                        <div class="result-card">
+                            <p class="result-label">Slant Height (l)</p>
+                            <p class="result-value" id="slantHeightResult">17.0 cm</p>
+                        </div>
+                        <div class="result-card">
+                            <p class="result-label">Base Area (πr²)</p>
+                            <p class="result-value accent-coral" id="baseAreaResult">201.1 cm²</p>
+                        </div>
+                        <div class="result-card full-width">
+                            <p class="result-label">Curved Surface Area (πrl)</p>
+                            <p class="result-value accent-mint" id="csaResult">427.3 cm²</p>
+                        </div>
+                    </div>
+
+                    <div class="observation" id="observation">
+                        <p class="observation-title">Observation</p>
+                        <p id="observationText">Adjust the height slider to explore how the cone transforms.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Volume of Cone -->
+    <section id="volume">
+        <div class="section-header">
+            <p class="section-number">02</p>
+            <h2 class="section-title">Volume of a Cone</h2>
+            <p class="section-subtitle">Visualize how the volume changes with height and radius. A cone holds exactly ⅓ of its enclosing cylinder.</p>
+        </div>
+
+        <div class="viz-container">
+            <div class="viz-grid">
+                <div class="canvas-wrapper">
+                    <canvas id="volumeCanvas" width="500" height="500"></canvas>
+                </div>
+                <div class="controls">
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Height (h)</span>
+                            <span class="control-value" id="volHeightValue">12 cm</span>
+                        </div>
+                        <input type="range" id="volHeightSlider" min="1" max="20" value="12" step="0.5">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Radius (r)</span>
+                            <span class="control-value" id="volRadiusValue">6 cm</span>
+                        </div>
+                        <input type="range" id="volRadiusSlider" min="2" max="12" value="6" step="0.5">
+                    </div>
+
+                    <div class="formula-box">
+                        <p class="formula-title">Volume Formula</p>
+                        <p class="formula">V = <span class="highlight">⅓ πr²h</span></p>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem;">
+                            The cone is exactly ⅓ of the cylinder with same base and height
+                        </p>
+                    </div>
+
+                    <div class="results">
+                        <div class="result-card">
+                            <p class="result-label">Cylinder Volume (πr²h)</p>
+                            <p class="result-value" id="cylinderVolResult">1357.2 cm³</p>
+                        </div>
+                        <div class="result-card">
+                            <p class="result-label">Cone Volume (⅓πr²h)</p>
+                            <p class="result-value accent-mint" id="coneVolResult">452.4 cm³</p>
+                        </div>
+                    </div>
+
+                    <div class="observation">
+                        <p class="observation-title">Visual Insight</p>
+                        <p>The transparent cylinder shows the volume the cone "fits into". Three cones of sand would fill one cylinder!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ice Cream Problems Slideshow -->
+    <section id="ice-cream">
+        <div class="section-header">
+            <p class="section-number">03</p>
+            <h2 class="section-title">Ice Cream Manufacturing</h2>
+            <p class="section-subtitle">Practical problems about making ice cream cones and waffle baskets</p>
+        </div>
+
+        <div class="slideshow-container" id="slideshow">
+            <!-- Slide 1: Context -->
+            <div class="slide active" data-slide="1">
+                <div class="slide-header">
+                    <span class="slide-type context">Context</span>
+                    <span class="slide-number">1 / 8</span>
+                </div>
+                <div class="slide-content">
+                    <div class="slide-text">
+                        <h3>Welcome to Creamistry — An Ice Cream Factory</h3>
+                        <p>You're the new production engineer at an ice cream factory. Your job involves calculating material requirements for manufacturing ice cream cones and waffle baskets.</p>
+                        <p>Today, you'll work through real-world problems involving surface areas and volumes of cones.</p>
+                        <div class="data-grid">
+                            <div class="data-item">
+                                <label>Daily Production</label>
+                                <span>10,000 cones</span>
+                            </div>
+                            <div class="data-item">
+                                <label>Wafer Thickness</label>
+                                <span>2 mm</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slide-visual">
+                        <canvas id="contextCanvas" width="400" height="400"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2: Question 1 -->
+            <div class="slide" data-slide="2">
+                <div class="slide-header">
+                    <span class="slide-type question">Question</span>
+                    <span class="slide-number">2 / 8</span>
+                </div>
+                <div class="slide-content">
+                    <div class="slide-text">
+                        <h3>How much dough is needed for one ice cream cone?</h3>
+                        <p>Each cone has the following dimensions:</p>
+                        <div class="data-grid">
+                            <div class="data-item">
+                                <label>Height</label>
+                                <span>12 cm</span>
+                            </div>
+                            <div class="data-item">
+                                <label>Radius</label>
+                                <span>3 cm</span>
+                            </div>
+                            <div class="data-item">
+                                <label>Wafer Thickness</label>
+                                <span>2 mm = 0.2 cm</span>
+                            </div>
+                            <div class="data-item">
+                                <label>Find</label>
+                                <span>Volume of wafer</span>
+                            </div>
+                        </div>
+                        <p style="margin-top: 1.5rem; color: var(--accent-warm);">
+                            <strong>Hint:</strong> The wafer forms a thin conical shell. Think about the difference between outer and inner cones.
+                        </p>
+                    </div>
+                    <div class="slide-visual">
+                        <canvas id="q1Canvas" width="400" height="400"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3: Answer 1 -->
+            <div class="slide" data-slide="3">
+                <div class="slide-header">
+                    <span class="slide-type answer">Answer</span>
+                    <span class="slide-number">3 / 8</span>
+                </div>
+                <div class="slide-content">
+                    <div class="slide-text">
+                        <h3>Volume of the Wafer Shell</h3>
+                        <div class="solution-box">
+                            <div class="solution-step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <p>Outer cone dimensions:</p>
+                                    <p class="math">R = 3 cm, H = 12 cm</p>
+                                </div>
+                            </div>
+                            <div class="solution-step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <p>Inner cone dimensions (reduced by thickness):</p>
+                                    <p class="math">r = 3 - 0.2 = 2.8 cm</p>
+                                    <p class="math">h = 12 - 0.2 = 11.8 cm</p>
+                                </div>
+                            </div>
+                            <div class="solution-step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <p>Volume = Outer cone - Inner cone</p>
+                                    <p class="math">V = ⅓π(3²×12) - ⅓π(2.8²×11.8)</p>
+                                    <p class="math">V = ⅓π(108) - ⅓π(92.512)</p>
+                                    <p class="math">V = ⅓π(15.488)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="final-answer">
+                            <div class="final-answer-icon">✓</div>
+                            <span>V ≈ 16.22 cm³ of dough per cone</span>
+                        </div>
+                    </div>
+                    <div class="slide-visual">
+                        <canvas id="a1Canvas" width="400" height="400"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 4: Follow-up Question -->
+            <div class="slide" data-slide="4">
+                <div class="slide-header">
+                    <span class="slide-type question">Follow-up</span>
+                    <span class="slide-number">4 / 8</span>
+                </div>
+                <div class="slide-content">
+                    <div class="slide-text">
+                        <h3>How much dough for daily production?</h3>
+                        <p>The factory produces 10,000 cones per day. Each cone requires 16.22 cm³ of dough.</p>
+                        <p>Dough is purchased in 25-liter containers. How many containers are needed per day?</p>
+                        <div class="data-grid">
+                            <div class="data-item">
+                                <label>Daily Cones</label>
+                                <span>10,000</span>
+                            </div>
+                            <div class="data-item">
+                                <label>Dough per Cone</label>
+                                <span>16.22 cm³</span>
+                            </div>
+                            <div class="data-item">
+                                <label>Container Size</label>
+                                <span>25 liters</span>
+                            </div>
+                            <div class="data-item">
+                                <label>1 liter =</label>
+                                <span>1000 cm³</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slide-visual">
+                        <canvas id="q2Canvas" width="400" height="400"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 5: Answer 2 -->
+            <div class="slide" data-slide="5">
+                <div class="slide-header">
+                    <span class="slide-type answer">Answer</span>
+                    <span class="slide-number">5 / 8</span>
+                </div>
+                <div class="slide-content">
+                    <div class="slide-text">
+                        <h3>Daily Dough Requirements</h3>
+                        <div class="solution-box">
+                            <div class="solution-step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <p>Total dough needed:</p>
+                                    <p class="math">10,000 × 16.22 = 162,200 cm³</p>
+                                </div>
+                            </div>
+                            <div class="solution-step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <p>Convert to liters:</p>
+                                    <p class="math">162,200 ÷ 1000 = 162.2 liters</p>
+                                </div>
+                            </div>
+                            <div class="solution-step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <p>Number of 25L containers:</p>
+                                    <p class="math">162.2 ÷ 25 = 6.49</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="final-answer">
+                            <div class="final-answer-icon">✓</div>
+                            <span>7 containers per day (always round up!)</span>
+                        </div>
+                    </div>
+                    <div class="slide-visual">
+                        <canvas id="a2Canvas" width="400" height="400"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 6: Waffle Basket Context -->
+            <div class="slide" data-slide="6">
+                <div class="slide-header">
+                    <span class="slide-type context">New Problem</span>
+                    <span class="slide-number">6 / 8</span>
+                </div>
+                <div class="slide-content">
+                    <div class="slide-text">
+                        <h3>The Waffle Basket Design</h3>
+                        <p>A premium waffle basket has a unique design: a flat circular base with a conical "collar" rising from its edge.</p>
+                        <p>Think of it like a cone with the tip cut off and a circular base added at the bottom.</p>
+                        <div class="data-grid">
+                            <div class="data-item">
+                                <label>Bottom Radius</label>
+                                <span>4 cm</span>
+                            </div>
+                            <div class="data-item">
+                                <label>Top Radius</label>
+                                <span>8 cm</span>
+                            </div>
+                            <div class="data-item">
+                                <label>Slant Height</label>
+                                <span>10 cm</span>
+                            </div>
+                            <div class="data-item">
+                                <label>Find</label>
+                                <span>Total Surface Area</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slide-visual">
+                        <canvas id="waffleCanvas" width="400" height="400"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 7: Waffle Basket Question -->
+            <div class="slide" data-slide="7">
+                <div class="slide-header">
+                    <span class="slide-type question">Question</span>
+                    <span class="slide-number">7 / 8</span>
+                </div>
+                <div class="slide-content">
+                    <div class="slide-text">
+                        <h3>Find the surface area of the waffle basket</h3>
+                        <p>The basket consists of:</p>
+                        <ul style="color: var(--text-secondary); margin: 1rem 0; padding-left: 1.5rem;">
+                            <li style="margin-bottom: 0.5rem;">A circular base (radius = 4 cm)</li>
+                            <li>A frustum (truncated cone) — which is the curved part</li>
+                        </ul>
+                        <p>Key Insight: The frustum's curved surface = Difference of two cones' curved surfaces</p>
+                        <div class="formula-box" style="margin-top: 1.5rem;">
+                            <p class="formula-title">Frustum CSA Formula</p>
+                            <p class="formula">CSA = π(R + r) × l</p>
+                            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem;">
+                                Where R = top radius, r = bottom radius, l = slant height
+                            </p>
+                        </div>
+                    </div>
+                    <div class="slide-visual">
+                        <canvas id="q3Canvas" width="400" height="400"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 8: Waffle Basket Answer -->
+            <div class="slide" data-slide="8">
+                <div class="slide-header">
+                    <span class="slide-type answer">Answer</span>
+                    <span class="slide-number">8 / 8</span>
+                </div>
+                <div class="slide-content">
+                    <div class="slide-text">
+                        <h3>Total Surface Area of Waffle Basket</h3>
+                        <div class="solution-box">
+                            <div class="solution-step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <p>Circular base area:</p>
+                                    <p class="math">A₁ = πr² = π × 4² = 16π cm²</p>
+                                </div>
+                            </div>
+                            <div class="solution-step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <p>Frustum curved surface area:</p>
+                                    <p class="math">A₂ = π(R + r) × l</p>
+                                    <p class="math">A₂ = π(8 + 4) × 10 = 120π cm²</p>
+                                </div>
+                            </div>
+                            <div class="solution-step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <p>Total surface area:</p>
+                                    <p class="math">A = 16π + 120π = 136π cm²</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="final-answer">
+                            <div class="final-answer-icon">✓</div>
+                            <span>Total Area ≈ 427.3 cm² (using π = 22/7)</span>
+                        </div>
+                    </div>
+                    <div class="slide-visual">
+                        <canvas id="a3Canvas" width="400" height="400"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide Navigation -->
+            <div class="slide-nav">
+                <div class="slide-progress">
+                    <div class="progress-dot active"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                </div>
+                <div class="slide-buttons">
+                    <button class="slide-btn" id="prevBtn" disabled>← Previous</button>
+                    <button class="slide-btn" id="nextBtn">Next →</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>Surface Areas & Volumes — Interactive Learning Tool for Class 9 Mathematics</p>
+    </footer>
+
+    <script>
+        // ===== CONE SURFACE AREA VISUALIZATION =====
+        const coneCanvas = document.getElementById('coneCanvas');
+        const coneCtx = coneCanvas.getContext('2d');
+        const heightSlider = document.getElementById('heightSlider');
+        const radiusSlider = document.getElementById('radiusSlider');
+
+        function drawCone() {
+            const h = parseFloat(heightSlider.value);
+            const r = parseFloat(radiusSlider.value);
+            const l = Math.sqrt(r * r + h * h);
+
+            // Update displays
+            document.getElementById('heightValue').textContent = `${h.toFixed(1)} cm`;
+            document.getElementById('radiusValue').textContent = `${r.toFixed(1)} cm`;
+            document.getElementById('slantHeightResult').textContent = `${l.toFixed(1)} cm`;
+
+            const baseArea = Math.PI * r * r;
+            const csa = Math.PI * r * l;
+            document.getElementById('baseAreaResult').textContent = `${baseArea.toFixed(1)} cm²`;
+            document.getElementById('csaResult').textContent = `${csa.toFixed(1)} cm²`;
+
+            // Update observation
+            let observation = '';
+            if (h === 0) {
+                observation = 'When height is zero, the cone becomes a flat circle! The curved surface area equals the base area (πr²). The slant height equals the radius.';
+            } else if (h < 3) {
+                observation = 'With very low height, the cone is almost flat. Notice how the slant height is nearly equal to the radius.';
+            } else if (h > 18) {
+                observation = 'A tall, narrow cone! The slant height is almost equal to the height when h >> r.';
+            } else {
+                observation = 'The slant height l is always greater than both h and r. Use Pythagoras: l² = r² + h²';
+            }
+            document.getElementById('observationText').textContent = observation;
+
+            // Clear canvas
+            coneCtx.clearRect(0, 0, coneCanvas.width, coneCanvas.height);
+
+            // Drawing parameters
+            const centerX = coneCanvas.width / 2;
+            const baseY = coneCanvas.height - 80;
+            const scale = 12;
+            const drawR = r * scale;
+            const drawH = h * scale;
+
+            // Draw grid
+            coneCtx.strokeStyle = 'rgba(255,255,255,0.05)';
+            coneCtx.lineWidth = 1;
+            for (let i = 0; i < coneCanvas.width; i += 25) {
+                coneCtx.beginPath();
+                coneCtx.moveTo(i, 0);
+                coneCtx.lineTo(i, coneCanvas.height);
+                coneCtx.stroke();
+            }
+            for (let i = 0; i < coneCanvas.height; i += 25) {
+                coneCtx.beginPath();
+                coneCtx.moveTo(0, i);
+                coneCtx.lineTo(coneCanvas.width, i);
+                coneCtx.stroke();
+            }
+
+            // Draw cone
+            const apexY = baseY - drawH;
+
+            // Curved surface gradient
+            const gradient = coneCtx.createLinearGradient(centerX - drawR, baseY, centerX + drawR, apexY);
+            gradient.addColorStop(0, 'rgba(124, 228, 180, 0.3)');
+            gradient.addColorStop(1, 'rgba(124, 228, 180, 0.1)');
+
+            // Draw cone body
+            coneCtx.beginPath();
+            coneCtx.moveTo(centerX, apexY);
+            coneCtx.lineTo(centerX - drawR, baseY);
+            coneCtx.lineTo(centerX + drawR, baseY);
+            coneCtx.closePath();
+            coneCtx.fillStyle = gradient;
+            coneCtx.fill();
+            coneCtx.strokeStyle = 'rgba(124, 228, 180, 0.8)';
+            coneCtx.lineWidth = 2;
+            coneCtx.stroke();
+
+            // Draw base ellipse
+            coneCtx.beginPath();
+            coneCtx.ellipse(centerX, baseY, drawR, drawR * 0.3, 0, 0, Math.PI * 2);
+            coneCtx.fillStyle = 'rgba(224, 120, 96, 0.3)';
+            coneCtx.fill();
+            coneCtx.strokeStyle = 'rgba(224, 120, 96, 0.8)';
+            coneCtx.stroke();
+
+            // Draw dimensions
+            coneCtx.font = '14px "JetBrains Mono", monospace';
+            coneCtx.fillStyle = '#e8c47c';
+
+            // Height line
+            coneCtx.beginPath();
+            coneCtx.setLineDash([5, 5]);
+            coneCtx.moveTo(centerX, apexY);
+            coneCtx.lineTo(centerX, baseY);
+            coneCtx.strokeStyle = 'rgba(232, 196, 124, 0.5)';
+            coneCtx.lineWidth = 1;
+            coneCtx.stroke();
+            coneCtx.setLineDash([]);
+
+            if (h > 0) {
+                coneCtx.fillText(`h = ${h.toFixed(1)}`, centerX + 10, (apexY + baseY) / 2);
+            }
+
+            // Radius line
+            coneCtx.fillText(`r = ${r.toFixed(1)}`, centerX + drawR/2 - 20, baseY + 25);
+
+            // Slant height
+            if (h > 0) {
+                coneCtx.fillStyle = '#7cc4e8';
+                const midSlantX = (centerX + centerX + drawR) / 2;
+                const midSlantY = (apexY + baseY) / 2;
+                coneCtx.fillText(`l = ${l.toFixed(1)}`, midSlantX + 10, midSlantY - 10);
+            }
+
+            // Apex point
+            if (h > 0) {
+                coneCtx.beginPath();
+                coneCtx.arc(centerX, apexY, 5, 0, Math.PI * 2);
+                coneCtx.fillStyle = '#e8c47c';
+                coneCtx.fill();
+            }
+        }
+
+        heightSlider.addEventListener('input', drawCone);
+        radiusSlider.addEventListener('input', drawCone);
+        drawCone();
+
+        // ===== VOLUME VISUALIZATION =====
+        const volumeCanvas = document.getElementById('volumeCanvas');
+        const volCtx = volumeCanvas.getContext('2d');
+        const volHeightSlider = document.getElementById('volHeightSlider');
+        const volRadiusSlider = document.getElementById('volRadiusSlider');
+
+        function drawVolume() {
+            const h = parseFloat(volHeightSlider.value);
+            const r = parseFloat(volRadiusSlider.value);
+
+            document.getElementById('volHeightValue').textContent = `${h.toFixed(1)} cm`;
+            document.getElementById('volRadiusValue').textContent = `${r.toFixed(1)} cm`;
+
+            const cylinderVol = Math.PI * r * r * h;
+            const coneVol = cylinderVol / 3;
+
+            document.getElementById('cylinderVolResult').textContent = `${cylinderVol.toFixed(1)} cm³`;
+            document.getElementById('coneVolResult').textContent = `${coneVol.toFixed(1)} cm³`;
+
+            volCtx.clearRect(0, 0, volumeCanvas.width, volumeCanvas.height);
+
+            const centerX = volumeCanvas.width / 2;
+            const baseY = volumeCanvas.height - 80;
+            const scale = 15;
+            const drawR = r * scale;
+            const drawH = h * scale;
+
+            // Grid
+            volCtx.strokeStyle = 'rgba(255,255,255,0.05)';
+            volCtx.lineWidth = 1;
+            for (let i = 0; i < volumeCanvas.width; i += 25) {
+                volCtx.beginPath();
+                volCtx.moveTo(i, 0);
+                volCtx.lineTo(i, volumeCanvas.height);
+                volCtx.stroke();
+            }
+            for (let i = 0; i < volumeCanvas.height; i += 25) {
+                volCtx.beginPath();
+                volCtx.moveTo(0, i);
+                volCtx.lineTo(volumeCanvas.width, i);
+                volCtx.stroke();
+            }
+
+            const topY = baseY - drawH;
+
+            // Draw cylinder (transparent)
+            volCtx.beginPath();
+            volCtx.rect(centerX - drawR, topY, drawR * 2, drawH);
+            volCtx.fillStyle = 'rgba(124, 196, 232, 0.1)';
+            volCtx.fill();
+            volCtx.strokeStyle = 'rgba(124, 196, 232, 0.4)';
+            volCtx.lineWidth = 2;
+            volCtx.setLineDash([5, 5]);
+            volCtx.stroke();
+            volCtx.setLineDash([]);
+
+            // Top ellipse
+            volCtx.beginPath();
+            volCtx.ellipse(centerX, topY, drawR, drawR * 0.25, 0, 0, Math.PI * 2);
+            volCtx.strokeStyle = 'rgba(124, 196, 232, 0.4)';
+            volCtx.stroke();
+
+            // Draw cone
+            const gradient = volCtx.createLinearGradient(centerX, baseY, centerX, topY);
+            gradient.addColorStop(0, 'rgba(124, 228, 180, 0.4)');
+            gradient.addColorStop(1, 'rgba(124, 228, 180, 0.1)');
+
+            volCtx.beginPath();
+            volCtx.moveTo(centerX, topY);
+            volCtx.lineTo(centerX - drawR, baseY);
+            volCtx.lineTo(centerX + drawR, baseY);
+            volCtx.closePath();
+            volCtx.fillStyle = gradient;
+            volCtx.fill();
+            volCtx.strokeStyle = 'rgba(124, 228, 180, 0.8)';
+            volCtx.lineWidth = 2;
+            volCtx.stroke();
+
+            // Base ellipse
+            volCtx.beginPath();
+            volCtx.ellipse(centerX, baseY, drawR, drawR * 0.25, 0, 0, Math.PI * 2);
+            volCtx.fillStyle = 'rgba(224, 120, 96, 0.3)';
+            volCtx.fill();
+            volCtx.strokeStyle = 'rgba(224, 120, 96, 0.8)';
+            volCtx.stroke();
+
+            // Labels
+            volCtx.font = '12px "JetBrains Mono", monospace';
+            volCtx.fillStyle = '#7cc4e8';
+            volCtx.fillText('Cylinder', centerX + drawR + 10, topY + 20);
+            volCtx.fillStyle = '#7ce8b4';
+            volCtx.fillText('Cone = ⅓', centerX - 30, (topY + baseY) / 2);
+
+            // Volume ratio visual
+            volCtx.fillStyle = 'rgba(255,255,255,0.1)';
+            volCtx.fillRect(20, 20, 100, 30);
+            volCtx.fillStyle = '#e8c47c';
+            volCtx.font = '11px "JetBrains Mono", monospace';
+            volCtx.fillText('Ratio 1:3', 35, 40);
+        }
+
+        volHeightSlider.addEventListener('input', drawVolume);
+        volRadiusSlider.addEventListener('input', drawVolume);
+        drawVolume();
+
+        // ===== SLIDESHOW =====
+        let currentSlide = 1;
+        const totalSlides = 8;
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.progress-dot');
+
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+
+            slides[n - 1].classList.add('active');
+            dots[n - 1].classList.add('active');
+
+            document.getElementById('prevBtn').disabled = n === 1;
+            document.getElementById('nextBtn').disabled = n === totalSlides;
+
+            // Draw canvas for current slide
+            drawSlideCanvas(n);
+        }
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentSlide > 1) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        });
+
+        function drawSlideCanvas(slideNum) {
+            switch(slideNum) {
+                case 1:
+                    drawContextCanvas();
+                    break;
+                case 2:
+                    drawQ1Canvas();
+                    break;
+                case 3:
+                    drawA1Canvas();
+                    break;
+                case 4:
+                    drawQ2Canvas();
+                    break;
+                case 5:
+                    drawA2Canvas();
+                    break;
+                case 6:
+                    drawWaffleCanvas();
+                    break;
+                case 7:
+                    drawQ3Canvas();
+                    break;
+                case 8:
+                    drawA3Canvas();
+                    break;
+            }
+        }
+
+        function drawContextCanvas() {
+            const canvas = document.getElementById('contextCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw decorative ice cream cones
+            const positions = [
+                { x: 100, y: 200, scale: 1.2 },
+                { x: 200, y: 180, scale: 1.5 },
+                { x: 300, y: 210, scale: 1.1 }
+            ];
+
+            positions.forEach(pos => {
+                drawIceCreamCone(ctx, pos.x, pos.y, pos.scale);
+            });
+
+            // Factory badge
+            ctx.font = '16px "Cormorant Garamond", serif';
+            ctx.fillStyle = '#e8c47c';
+            ctx.textAlign = 'center';
+            ctx.fillText('🍦 Creamistry Ice Cream Co.', canvas.width / 2, 350);
+        }
+
+        function drawIceCreamCone(ctx, x, y, scale) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(scale, scale);
+
+            // Cone
+            ctx.beginPath();
+            ctx.moveTo(0, -30);
+            ctx.lineTo(-25, 50);
+            ctx.lineTo(25, 50);
+            ctx.closePath();
+            ctx.fillStyle = '#d4a574';
+            ctx.fill();
+            ctx.strokeStyle = '#b8956a';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Waffle pattern
+            ctx.strokeStyle = 'rgba(139, 90, 43, 0.4)';
+            ctx.lineWidth = 1;
+            for (let i = -20; i < 45; i += 8) {
+                ctx.beginPath();
+                ctx.moveTo(-20 + Math.abs(i) * 0.3, i);
+                ctx.lineTo(20 - Math.abs(i) * 0.3, i);
+                ctx.stroke();
+            }
+
+            // Ice cream scoop
+            ctx.beginPath();
+            ctx.arc(0, -45, 35, 0, Math.PI * 2);
+            const gradient = ctx.createRadialGradient(0, -45, 5, 0, -45, 35);
+            gradient.addColorStop(0, '#fff5eb');
+            gradient.addColorStop(1, '#f5d6c6');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function drawQ1Canvas() {
+            const canvas = document.getElementById('q1Canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const baseY = 320;
+
+            // Draw cone with thickness shown
+            drawConeWithThickness(ctx, centerX, baseY, 60, 180, 4, true);
+
+            // Labels
+            ctx.font = '12px "JetBrains Mono", monospace';
+            ctx.fillStyle = '#e8c47c';
+            ctx.textAlign = 'center';
+            ctx.fillText('Outer radius = 3 cm', centerX, baseY + 40);
+            ctx.fillText('Height = 12 cm', centerX + 80, baseY - 90);
+            ctx.fillStyle = '#7ce8b4';
+            ctx.fillText('Thickness = 2 mm', centerX - 70, baseY - 60);
+        }
+
+        function drawConeWithThickness(ctx, x, y, r, h, thickness, showThickness) {
+            // Outer cone
+            ctx.beginPath();
+            ctx.moveTo(x, y - h);
+            ctx.lineTo(x - r, y);
+            ctx.lineTo(x + r, y);
+            ctx.closePath();
+
+            const gradient = ctx.createLinearGradient(x, y, x, y - h);
+            gradient.addColorStop(0, 'rgba(212, 165, 116, 0.8)');
+            gradient.addColorStop(1, 'rgba(212, 165, 116, 0.4)');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.strokeStyle = '#d4a574';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            if (showThickness) {
+                // Inner cone (hollow part)
+                const innerR = r - thickness;
+                const innerH = h - thickness;
+                ctx.beginPath();
+                ctx.moveTo(x, y - h);
+                ctx.lineTo(x - innerR, y - thickness);
+                ctx.lineTo(x + innerR, y - thickness);
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(26, 26, 36, 0.9)';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(124, 228, 180, 0.6)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                // Thickness indicator
+                ctx.beginPath();
+                ctx.setLineDash([3, 3]);
+                ctx.moveTo(x + r, y);
+                ctx.lineTo(x + innerR, y - thickness);
+                ctx.strokeStyle = '#7ce8b4';
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Base ellipse
+            ctx.beginPath();
+            ctx.ellipse(x, y, r, r * 0.25, 0, 0, Math.PI * 2);
+            ctx.strokeStyle = '#d4a574';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function drawA1Canvas() {
+            const canvas = document.getElementById('a1Canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+
+            // Draw both cones side by side
+            // Outer cone
+            ctx.font = '11px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#e07860';
+            ctx.fillText('OUTER', centerX - 80, 60);
+            drawSimpleCone(ctx, centerX - 80, 280, 50, 150, 'rgba(224, 120, 96, 0.5)', '#e07860');
+
+            // Minus sign
+            ctx.font = '24px "Outfit", sans-serif';
+            ctx.fillStyle = '#f5f5f0';
+            ctx.fillText('−', centerX, 180);
+
+            // Inner cone
+            ctx.font = '11px "JetBrains Mono", monospace';
+            ctx.fillStyle = '#7ce8b4';
+            ctx.fillText('INNER', centerX + 80, 60);
+            drawSimpleCone(ctx, centerX + 80, 280, 46, 145, 'rgba(124, 228, 180, 0.5)', '#7ce8b4');
+
+            // Result
+            ctx.fillStyle = '#e8c47c';
+            ctx.font = '14px "JetBrains Mono", monospace';
+            ctx.fillText('= Wafer Volume', centerX, 340);
+            ctx.fillText('≈ 16.22 cm³', centerX, 365);
+        }
+
+        function drawSimpleCone(ctx, x, y, r, h, fill, stroke) {
+            ctx.beginPath();
+            ctx.moveTo(x, y - h);
+            ctx.lineTo(x - r, y);
+            ctx.lineTo(x + r, y);
+            ctx.closePath();
+            ctx.fillStyle = fill;
+            ctx.fill();
+            ctx.strokeStyle = stroke;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.ellipse(x, y, r, r * 0.25, 0, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        function drawQ2Canvas() {
+            const canvas = document.getElementById('q2Canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw multiple small cones to represent production
+            ctx.font = '11px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#e8c47c';
+            ctx.fillText('DAILY PRODUCTION: 10,000 CONES', canvas.width / 2, 30);
+
+            // Grid of small cones
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < 5; col++) {
+                    const x = 60 + col * 70;
+                    const y = 120 + row * 70;
+                    drawMiniCone(ctx, x, y);
+                }
+            }
+
+            // Dots to indicate more
+            ctx.fillStyle = '#a8a8b0';
+            ctx.fillText('... × 500', canvas.width / 2, 340);
+
+            // Container visual
+            ctx.fillStyle = 'rgba(124, 196, 232, 0.3)';
+            ctx.fillRect(canvas.width / 2 - 30, 360, 60, 30);
+            ctx.strokeStyle = '#7cc4e8';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(canvas.width / 2 - 30, 360, 60, 30);
+            ctx.fillStyle = '#7cc4e8';
+            ctx.font = '10px "JetBrains Mono", monospace';
+            ctx.fillText('25L', canvas.width / 2, 380);
+        }
+
+        function drawMiniCone(ctx, x, y) {
+            ctx.beginPath();
+            ctx.moveTo(x, y - 25);
+            ctx.lineTo(x - 12, y);
+            ctx.lineTo(x + 12, y);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(212, 165, 116, 0.6)';
+            ctx.fill();
+            ctx.strokeStyle = '#d4a574';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        function drawA2Canvas() {
+            const canvas = document.getElementById('a2Canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw 7 containers
+            ctx.font = '12px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#e8c47c';
+            ctx.fillText('7 CONTAINERS NEEDED', canvas.width / 2, 40);
+
+            const containerWidth = 40;
+            const containerHeight = 60;
+            const startX = (canvas.width - 7 * (containerWidth + 10)) / 2;
+
+            for (let i = 0; i < 7; i++) {
+                const x = startX + i * (containerWidth + 10);
+                const y = 100;
+
+                // Container
+                ctx.fillStyle = i < 6 ? 'rgba(124, 228, 180, 0.4)' : 'rgba(232, 196, 124, 0.4)';
+                ctx.fillRect(x, y, containerWidth, containerHeight);
+                ctx.strokeStyle = i < 6 ? '#7ce8b4' : '#e8c47c';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, containerWidth, containerHeight);
+
+                // Fill level
+                const fillHeight = i < 6 ? containerHeight - 5 : containerHeight * 0.49;
+                ctx.fillStyle = i < 6 ? 'rgba(124, 228, 180, 0.6)' : 'rgba(232, 196, 124, 0.6)';
+                ctx.fillRect(x + 3, y + containerHeight - fillHeight, containerWidth - 6, fillHeight - 3);
+
+                // Label
+                ctx.fillStyle = '#a8a8b0';
+                ctx.font = '10px "JetBrains Mono", monospace';
+                ctx.fillText(`${i + 1}`, x + containerWidth / 2, y + containerHeight + 20);
+            }
+
+            // Explanation
+            ctx.font = '11px "Outfit", sans-serif';
+            ctx.fillStyle = '#a8a8b0';
+            ctx.fillText('6 full containers + 1 partial = 7 total', canvas.width / 2, 220);
+            ctx.fillText('(Always round up for production!)', canvas.width / 2, 240);
+
+            // Arrow showing calculation
+            ctx.fillStyle = '#e8c47c';
+            ctx.font = '12px "JetBrains Mono", monospace';
+            ctx.fillText('162.2L ÷ 25L = 6.49 → 7', canvas.width / 2, 300);
+        }
+
+        function drawWaffleCanvas() {
+            const canvas = document.getElementById('waffleCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawFrustum(ctx, canvas.width / 2, 250, 40, 80, 100);
+
+            // Dimension labels
+            ctx.font = '11px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#e8c47c';
+            ctx.fillText('r = 4 cm', canvas.width / 2, 310);
+            ctx.fillText('R = 8 cm', canvas.width / 2, 135);
+            ctx.fillStyle = '#7cc4e8';
+            ctx.fillText('l = 10 cm', canvas.width / 2 + 85, 200);
+        }
+
+        function drawFrustum(ctx, x, y, r1, r2, h) {
+            // Bottom circle (smaller)
+            ctx.beginPath();
+            ctx.ellipse(x, y, r1, r1 * 0.3, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(224, 120, 96, 0.4)';
+            ctx.fill();
+            ctx.strokeStyle = '#e07860';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Frustum sides
+            ctx.beginPath();
+            ctx.moveTo(x - r1, y);
+            ctx.lineTo(x - r2, y - h);
+            ctx.lineTo(x + r2, y - h);
+            ctx.lineTo(x + r1, y);
+            ctx.closePath();
+
+            const gradient = ctx.createLinearGradient(x, y, x, y - h);
+            gradient.addColorStop(0, 'rgba(212, 165, 116, 0.6)');
+            gradient.addColorStop(1, 'rgba(212, 165, 116, 0.3)');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.strokeStyle = '#d4a574';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Top ellipse (larger, open)
+            ctx.beginPath();
+            ctx.ellipse(x, y - h, r2, r2 * 0.3, 0, 0, Math.PI * 2);
+            ctx.strokeStyle = '#d4a574';
+            ctx.stroke();
+
+            // Slant height line
+            ctx.beginPath();
+            ctx.setLineDash([5, 5]);
+            ctx.moveTo(x + r1, y);
+            ctx.lineTo(x + r2, y - h);
+            ctx.strokeStyle = '#7cc4e8';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function drawQ3Canvas() {
+            const canvas = document.getElementById('q3Canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw frustum with highlighted parts
+            const centerX = canvas.width / 2;
+
+            // Show the two cones concept
+            ctx.font = '11px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#a8a8b0';
+            ctx.fillText('FRUSTUM = BIG CONE − SMALL CONE', centerX, 30);
+
+            // Big cone (ghost)
+            ctx.beginPath();
+            ctx.setLineDash([5, 5]);
+            ctx.moveTo(centerX, 60);
+            ctx.lineTo(centerX - 80, 280);
+            ctx.lineTo(centerX + 80, 280);
+            ctx.closePath();
+            ctx.strokeStyle = 'rgba(124, 196, 232, 0.4)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Actual frustum
+            drawFrustum(ctx, centerX, 280, 40, 80, 100);
+
+            // Small cone removed (ghost)
+            ctx.beginPath();
+            ctx.setLineDash([5, 5]);
+            ctx.moveTo(centerX, 60);
+            ctx.lineTo(centerX - 40, 180);
+            ctx.lineTo(centerX + 40, 180);
+            ctx.closePath();
+            ctx.strokeStyle = 'rgba(124, 228, 180, 0.4)';
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Labels
+            ctx.fillStyle = '#7cc4e8';
+            ctx.font = '10px "JetBrains Mono", monospace';
+            ctx.fillText('Big cone', centerX - 70, 100);
+            ctx.fillStyle = '#7ce8b4';
+            ctx.fillText('Small cone', centerX + 60, 120);
+            ctx.fillText('(removed)', centerX + 60, 135);
+        }
+
+        function drawA3Canvas() {
+            const canvas = document.getElementById('a3Canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+
+            // Draw final basket with areas highlighted
+            // Base circle
+            ctx.beginPath();
+            ctx.ellipse(centerX, 280, 40, 12, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(224, 120, 96, 0.5)';
+            ctx.fill();
+            ctx.strokeStyle = '#e07860';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Frustum (curved surface)
+            ctx.beginPath();
+            ctx.moveTo(centerX - 40, 280);
+            ctx.lineTo(centerX - 80, 180);
+            ctx.lineTo(centerX + 80, 180);
+            ctx.lineTo(centerX + 40, 280);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(124, 228, 180, 0.3)';
+            ctx.fill();
+            ctx.strokeStyle = '#7ce8b4';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Top ellipse
+            ctx.beginPath();
+            ctx.ellipse(centerX, 180, 80, 24, 0, 0, Math.PI * 2);
+            ctx.strokeStyle = '#7ce8b4';
+            ctx.stroke();
+
+            // Area labels with arrows
+            ctx.font = '11px "JetBrains Mono", monospace';
+            ctx.textAlign = 'left';
+
+            // Base area
+            ctx.fillStyle = '#e07860';
+            ctx.fillText('Base: πr² = 16π cm²', 20, 340);
+
+            // CSA
+            ctx.fillStyle = '#7ce8b4';
+            ctx.fillText('CSA: π(R+r)l = 120π cm²', 20, 360);
+
+            // Total
+            ctx.fillStyle = '#e8c47c';
+            ctx.font = '13px "JetBrains Mono", monospace';
+            ctx.fillText('TOTAL: 136π ≈ 427.3 cm²', 20, 390);
+
+            // Decorative checkmark
+            ctx.beginPath();
+            ctx.arc(centerX, 80, 30, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(124, 228, 180, 0.2)';
+            ctx.fill();
+            ctx.strokeStyle = '#7ce8b4';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.font = '24px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#7ce8b4';
+            ctx.fillText('✓', centerX, 90);
+        }
+
+        // Initialize first slide canvas
+        drawContextCanvas();
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' && currentSlide < totalSlides) {
+                currentSlide++;
+                showSlide(currentSlide);
+            } else if (e.key === 'ArrowLeft' && currentSlide > 1) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        });
+    </script>
+</body>
+</html>

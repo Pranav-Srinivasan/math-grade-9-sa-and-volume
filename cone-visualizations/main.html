@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surface Areas & Volumes — Interactive Explorations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --text-primary: #f5f5f0;
+            --text-secondary: #a8a8b0;
+            --text-muted: #6b6b78;
+            --accent-warm: #e8c47c;
+            --accent-coral: #e07860;
+            --accent-ice: #7cc4e8;
+            --accent-mint: #7ce8b4;
+            --border: rgba(255,255,255,0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Noise texture */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            z-index: 9999;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to bottom, var(--bg-primary) 60%, transparent);
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--accent-warm);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 400;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+            padding: 0.5rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-warm);
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 6rem 2rem;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 600px;
+            height: 600px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(232,196,124,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--accent-warm);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards;
+        }
+
+        .hero h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 7vw, 5rem);
+            font-weight: 400;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease 0.2s forwards;
+        }
+
+        .hero h1 span {
+            font-style: italic;
+            color: var(--accent-warm);
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            max-width: 450px;
+            margin-bottom: 2.5rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease 0.4s forwards;
+        }
+
+        .hero-convention {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-ice);
+            background: var(--bg-card);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            opacity: 0;
+            animation: fadeUp 0.8s ease 0.6s forwards;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Sections Grid */
+        .sections-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .sections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .section-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            display: block;
+        }
+
+        .section-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-warm);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .section-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--accent-coral);
+            letter-spacing: 0.15em;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-card h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-card p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .section-tag {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 1rem;
+            margin-top: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .tag-interactive {
+            background: rgba(124, 196, 232, 0.2);
+            color: var(--accent-ice);
+        }
+
+        .tag-problems {
+            background: rgba(124, 228, 180, 0.2);
+            color: var(--accent-mint);
+        }
+
+        .tag-formulas {
+            background: rgba(232, 196, 124, 0.2);
+            color: var(--accent-warm);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .footer-formulas {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .formula-item {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .nav-links {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">Geometry Lab</div>
+        <ul class="nav-links">
+            <li><a href="#sections">All Sections</a></li>
+            <li><a href="section-a1.html">Cone CSA</a></li>
+            <li><a href="section-a2.html">Cone Volume</a></li>
+            <li><a href="section-b.html">Manufacturing</a></li>
+            <li><a href="section-c.html">Frustum</a></li>
+            <li><a href="section-de.html">Spheres</a></li>
+            <li><a href="section-f.html">Cost Analysis</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <span class="hero-badge">Chapter 11 • Class 9 Mathematics</span>
+        <h1>Surface Areas <span>&</span> Volumes</h1>
+        <p class="hero-subtitle">Interactive explorations of cones, spheres, and real-world applications through the lens of an ice cream factory</p>
+        <div class="hero-convention">Convention: π = 22/7</div>
+    </section>
+
+    <section class="sections-container" id="sections">
+        <div class="sections-grid">
+            <a href="section-a1.html" class="section-card">
+                <div class="section-number">PART A.1</div>
+                <h3>Cone Surface Area</h3>
+                <p>Drag the height slider and watch the cone transform. See what happens when height becomes zero.</p>
+                <span class="section-tag tag-interactive">Interactive</span>
+            </a>
+
+            <a href="section-a2.html" class="section-card">
+                <div class="section-number">PART A.2</div>
+                <h3>Cone Volume</h3>
+                <p>Visualize how a cone is exactly one-third of its enclosing cylinder.</p>
+                <span class="section-tag tag-interactive">Interactive</span>
+            </a>
+
+            <a href="section-b.html" class="section-card">
+                <div class="section-number">PART B</div>
+                <h3>Wafer Manufacturing</h3>
+                <p>Calculate dough requirements for ice cream cones. CSA × thickness approach.</p>
+                <span class="section-tag tag-problems">5 Slides</span>
+            </a>
+
+            <a href="section-c.html" class="section-card">
+                <div class="section-number">PART C</div>
+                <h3>Waffle Basket (Frustum)</h3>
+                <p>Big cone minus small cone. Surface area and volume of truncated cones.</p>
+                <span class="section-tag tag-problems">6 Slides</span>
+            </a>
+
+            <a href="section-de.html" class="section-card">
+                <div class="section-number">PART D & E</div>
+                <h3>Sphere Formulas</h3>
+                <p>Surface area, volume, and the Moon painting problem.</p>
+                <span class="section-tag tag-formulas">Formulas + Problems</span>
+            </a>
+
+            <a href="section-f.html" class="section-card">
+                <div class="section-number">PART F</div>
+                <h3>Ice Cream Costs</h3>
+                <p>Classic, Fully Loaded, Secret Surprise, and Cornetto — find the cost of each!</p>
+                <span class="section-tag tag-problems">9 Slides</span>
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-formulas">
+            <span class="formula-item">CSA of Cone = πrl</span>
+            <span class="formula-item">Volume of Cone = ⅓πr²h</span>
+            <span class="formula-item">SA of Sphere = 4πr²</span>
+            <span class="formula-item">Volume of Sphere = ⁴⁄₃πr³</span>
+        </div>
+        <p>Surface Areas & Volumes — Revision Tool for Class 9 Mathematics</p>
+    </footer>
+</body>
+</html>
